@@ -8,7 +8,7 @@ A weekly fantasy league web app where the picks are real Coinbase Tokenized Stoc
 
 ## What we are building and why it qualifies
 
-Hackathon: Base Builder Quest, "Request for Builders: Tokenized Stocks". $5,000 prize pool. Brief: build a project that helps people trade or use Coinbase Tokenized Stocks on Base. Deadline, judging criteria and submission form: UNKNOWN, fill in from the @base / @buildonbase X posts before Phase 1.
+Hackathon: Base Builder Quest, "Request for Builders: Tokenized Stocks". $5,000 prize pool. Brief: build a project that helps people trade or use Coinbase Tokenized Stocks on Base. Deadline: Wed 9 Sep 2026 23:59 New York (Thu 10 Sep 03:59 UTC). Submission form and judging criteria still to be pulled from the @base / @buildonbase X posts.
 
 Gameweek makes people trade tokenized stocks every week:
 - A league is 3 to 20 friends who join by invite link. Each member has a league wallet (a Base Account Sub Account) funded with a small USDC budget.
@@ -296,18 +296,42 @@ Phase 6 — Submission
 - [ ] 6.3 Rename CLAUDE.md -> AGENTS.md. Delete IDEAS.md, HACKATHON_WORKFLOW.md, PHASE_0_CHECKLIST.md, BUILD_GUIDE.md.
 - [ ] 6.4 4 slides, sub-3-minute video, submit.
 
-## Milestones (fill dates once the deadline is known)
+## Deadline and schedule
 
-| Date | What |
-|---|---|
-| D0 | Day-0 proofs done, contract deployed |
-| D2 | Trading + league loop demoable end to end on a phone |
-| Friday F1 21:00 UTC | Live league #1 locks with ≥ 8 real players + the bot. This Friday must be at least 8 days before the deadline |
-| Sunday F1+2 | Draft night. Screenshots and screen recording captured |
-| Friday F1+7 21:00 UTC | settle() on live league #1. Record tx hash, podium, volume attributed to the Builder Code |
-| Deadline − 1 day | README with real numbers, video, AGENTS.md rename, submit |
+**Wed 9 Sep 2026, 23:59 New York = Thu 10 Sep 03:59 UTC.** Confirmed by the user 6 Sep.
 
-Deadline: UNKNOWN. If the deadline is under 8 days away, drop the live week and run a 3-day demo league instead.
+Under four days. The 24 hour round is what makes a live submission possible at all: two full rounds
+lock and settle before the deadline, where a weekly format would have fitted none.
+
+| When (UTC) | What | Owner |
+|---|---|---|
+| Sun 6 Sep, today | Deploy both contracts, register tokens, one $0.25 live draft to prove the loop | needs the funded deployer |
+| Sun 6 Sep | Open Round 1, locking Mon 21:00. Recruit players, everyone picks a side | you |
+| Mon 7 Sep 21:00 | **Round 1 locks.** Starting NAVs recorded onchain | anyone |
+| Tue 8 Sep 21:00 | **Round 1 settles, pot paid.** Round 2 opens and locks | anyone |
+| Tue 8 Sep | Record the demo with a settled round of real data | |
+| Wed 9 Sep 21:00 | **Round 2 settles.** 7 hours of slack | anyone |
+| Wed 9 Sep, evening | README numbers, video, submit | |
+
+If the deploy slips past Monday 21:00 there is still one round, Tue to Wed, with 7 hours of slack.
+That is the last train. Everything else is negotiable, that is not.
+
+## Scope, cut to fit
+
+Ship, in this order:
+1. Deploy and one real draft. Nothing else counts without it.
+2. Share card. A side on a pitch with a score is the postable object and the video's closing shot.
+3. The bot, so a league is never empty and the agents section of the RFB is answered.
+4. Round rollover, so the daily ritual exists without someone running a script.
+5. README with real numbers, four slides, sub-three-minute video.
+
+Cut, and do not reopen before the deadline:
+- Coach card and any Claude API call. Nice, not load-bearing, and an external dependency in a demo.
+- Dividend badge, notifications, streaks.
+- Create-a-league from the UI. The script is enough.
+- Basenames, pot transparency page.
+- Weekend scoring off the pool TWAP. A real contract change, and rounds already avoid weekends.
+- Real company logos on the kits. Colours and tickers read fine.
 
 ## Commands
 
@@ -452,4 +476,4 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 ## Status
 
 Phase: 4 mostly done. Contract complete (44 tests green, not yet deployed). Draft loop and league loop both built and verified in a browser. Leaderboard, join, lock, settle and a read-only spectator view all work against a local chain seeded by ./script/local-dev.sh. GameweekRouter written and tested but not deployed. Next action: deploy Gameweek and GameweekRouter to Base mainnet, which needs a funded deployer key from PHASE_0_CHECKLIST.md, then a $2 live swap to prove the loop end to end. No 0x key is needed any more.
-Deadline: UNKNOWN. Contract address: not deployed. Builder Code: not registered.
+Deadline: Thu 10 Sep 03:59 UTC. Contract address: not deployed. Builder Code: not registered.

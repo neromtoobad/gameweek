@@ -1,5 +1,24 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { LeagueView } from "@/components/LeagueView";
+import { readLeague } from "@/lib/leagues";
+import { APP_URL } from "@/lib/config";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const league = await readLeague(Number.parseInt(id, 10)).catch(() => null);
+  const title = league ? `${league.name} · Gameweek` : "Gameweek";
+  return {
+    title,
+    description: "Fantasy football, except the players are real stocks.",
+    openGraph: { title, images: [`${APP_URL}/api/og/${id}`] },
+    twitter: { card: "summary_large_image", title, images: [`${APP_URL}/api/og/${id}`] },
+  };
+}
 
 export default async function LeaguePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

@@ -12,6 +12,7 @@ import { countdown, shortAddress, usd } from "@/lib/format";
 import { txUrl } from "@/lib/config";
 import { Leaderboard } from "./Leaderboard";
 import { MySide } from "./MySide";
+import { ShareBar } from "./ShareBar";
 
 const PHASE_COPY = {
   drafting: { label: "Team sheets", hint: "Sides can be picked until the round locks." },
@@ -132,6 +133,23 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
           scoreBps={rows.find((r) => r.member.toLowerCase() === shown.toLowerCase())?.scoreBps ?? null}
           heading={isOwnSide ? "Your side" : `${shortAddress(shown)}'s side`}
           onBack={isOwnSide ? undefined : () => setViewing(null)}
+        />
+      )}
+
+      {isOwnSide && wallet && (
+        <ShareBar
+          leagueId={id}
+          leagueName={l.name}
+          matchday={matchdayNumber(now)}
+          rank={rows.find((r) => r.member.toLowerCase() === wallet.toLowerCase())?.rank ?? 0}
+          players={rows.length}
+          points={
+            (() => {
+              const bps = rows.find((r) => r.member.toLowerCase() === wallet.toLowerCase())?.scoreBps;
+              return bps == null ? null : Math.round((bps - 10_000) / 10);
+            })()
+          }
+          tickers={[]}
         />
       )}
 

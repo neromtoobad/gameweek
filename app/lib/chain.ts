@@ -21,12 +21,37 @@ export type MulticallResult<T> = { status: "success"; result: T } | { status: "f
  * so failed entries are retried on their own with a short backoff. Whatever still fails after the
  * last attempt is genuinely unavailable.
  */
+/**
+ * Whether this chain has the Multicall3 the client is configured to use.
+ *
+ * The chain config carries Base's address, so pointing the same client at a local node leaves it
+ * calling into nothing. Retrying that three times per batch cost five seconds a page. Probed once
+ * and remembered.
+ */
+let multicallAvailable: Promise<boolean> | null = null;
+
+function hasMulticall(): Promise<boolean> {
+  if (!multicallAvailable) {
+    const address = publicClient.chain?.contracts?.multicall3?.address;
+    multicallAvailable = !address
+      ? Promise.resolve(false)
+      : publicClient
+          .getCode({ address })
+          .then((code) => Boolean(code && code !== "0x"))
+          .catch(() => false);
+  }
+  return multicallAvailable;
+}
+
 export async function multicallResilient<T = unknown>(
   contracts: MulticallEntry[],
   { attempts = 3, delayMs = 400 }: { attempts?: number; delayMs?: number } = {},
 ): Promise<MulticallResult<T>[]> {
   const out: MulticallResult<T>[] = contracts.map(() => ({ status: "failure" }));
   let pending = contracts.map((_, i) => i);
+
+  const batching = await hasMulticall();
+  if (!batching) attempts = 0; // go straight to individual calls
 
   for (let attempt = 0; attempt < attempts && pending.length > 0; attempt++) {
     if (attempt > 0) await new Promise((r) => setTimeout(r, delayMs * attempt));
