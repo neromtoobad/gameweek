@@ -60,24 +60,27 @@ fi
 TREASURY="${TREASURY:-$DEPLOYER}"
 echo "  treasury   $TREASURY"
 
-VERIFY_ARGS=()
+# Build the whole forge invocation as one array. macOS ships bash 3.2, where expanding an empty
+# array under `set -u` is an unbound variable error, so an array that is sometimes empty is a trap.
+FORGE_ARGS=(
+  script script/Deploy.s.sol:Deploy
+  --rpc-url "$BASE_RPC_URL"
+  --account "$ACCOUNT"
+  --sender "$DEPLOYER"
+  --broadcast
+)
 if [ -n "${BASESCAN_API_KEY:-}" ]; then
-  VERIFY_ARGS=(--verify --etherscan-api-key "$BASESCAN_API_KEY")
+  FORGE_ARGS+=(--verify --etherscan-api-key "$BASESCAN_API_KEY")
   echo "  verify     on"
 else
-  echo "  verify     off (BASESCAN_API_KEY unset)"
+  echo "  verify     off (BASESCAN_API_KEY unset; verify later with forge verify-contract)"
 fi
 
 # ---------------------------------------------------------------- deploy
 
 bold "2/5  Deploying"
 
-TREASURY="$TREASURY" forge script script/Deploy.s.sol:Deploy \
-  --rpc-url "$BASE_RPC_URL" \
-  --account "$ACCOUNT" \
-  --sender "$DEPLOYER" \
-  --broadcast \
-  "${VERIFY_ARGS[@]}"
+TREASURY="$TREASURY" forge "${FORGE_ARGS[@]}"
 
 RUN="broadcast/Deploy.s.sol/8453/run-latest.json"
 [ -f "$RUN" ] || fail "No broadcast record at $RUN"
