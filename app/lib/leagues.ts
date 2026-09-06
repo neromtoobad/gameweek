@@ -1,6 +1,12 @@
 import { publicClient, multicallResilient } from "./chain";
 import { gameweekAbi } from "./gameweekAbi";
 import { GAMEWEEK } from "./config";
+import { erc20Abi } from "./chain";
+import { LISTINGS, type Listing } from "./tokens";
+
+/** Display name for a ticker, falling back to the ticker itself for anything unrecognised. */
+const nameFor = (ticker: string): string =>
+  LISTINGS.find((l) => l.ticker === ticker)?.name ?? ticker.replace(/c$/, "");
 
 /** Mirrors Gameweek.MAX_SCORE_BPS. A score is capped at five times the starting value. */
 export const MAX_SCORE_BPS = 50_000;
@@ -177,4 +183,53 @@ export async function readPodium(id: number): Promise<readonly [`0x${string}`, `
     functionName: "getPodium",
     args: [BigInt(id)],
   })) as readonly [`0x${string}`, `0x${string}`, `0x${string}`];
+}
+
+/**
+ * The tokens the contract will actually score, read from the contract.
+ *
+ * The app ships a list of mainnet addresses, but the contract is the authority on what counts: a
+ * token registered onchain is scored whether or not the front end knows about it. Reading the
+ * registry here means a new listing needs no app deploy, and it means a local chain seeded with
+ * mock tokens works exactly like mainnet.
+ *
+ * Ticker and name come from the token itself. Kits are matched on ticker, so a stock keeps its
+ * colours wherever it is deployed.
+ */
+export async function readRegisteredListings(): Promise<Listing[]> {
+  const address = requireAddress();
+
+  const count = Number(
+    await publicClient.readContract({ address, abi: gameweekAbi, functionName: "tokenCount" }),
+  );
+  if (count === 0) return [];
+
+  const tokens = await multicallResilient<`0x${string}`>(
+    Array.from({ length: count }, (_, i) => ({
+      address,
+      abi: gameweekAbi,
+      functionName: "tokens",
+      args: [BigInt(i)],
+    })),
+  );
+
+  const found = tokens.flatMap((t) => (t.status === "success" ? [t.result] : []));
+  if (found.length === 0) return [];
+
+  const [symbols, info] = await Promise.all([
+    multicallResilient<string>(
+      found.map((token) => ({ address: token, abi: erc20Abi, functionName: "symbol" })),
+    ),
+    multicallResilient<readonly [`0x${string}`, bigint, boolean]>(
+      found.map((token) => ({ address, abi: gameweekAbi, functionName: "tokenInfo", args: [token] })),
+    ),
+  ]);
+
+  return found.flatMap((token, i) => {
+    if (symbols[i].status !== "success" || info[i].status !== "success") return [];
+    const ticker = symbols[i].result;
+    const [feed, , enabled] = info[i].result;
+    if (!enabled) return [];
+    return [{ ticker, name: nameFor(ticker), token, feed, live: true }];
+  });
 }

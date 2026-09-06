@@ -8,9 +8,10 @@ import { useAccounts } from "@/lib/useAccounts";
 import { sendLeagueAction } from "@/lib/leagueActions";
 import { useNowSeconds } from "@/lib/useNow";
 import { matchdayNumber } from "@/lib/gameweek";
-import { countdown, usd } from "@/lib/format";
+import { countdown, shortAddress, usd } from "@/lib/format";
 import { txUrl } from "@/lib/config";
 import { Leaderboard } from "./Leaderboard";
+import { MySide } from "./MySide";
 
 const PHASE_COPY = {
   drafting: { label: "Team sheets", hint: "Sides can be picked until the round locks." },
@@ -24,6 +25,9 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
   const { accounts } = useAccounts();
   const wallet = accounts?.league ?? null;
   const [busy, setBusy] = useState<string | null>(null);
+  // Which player's side is on show. Defaults to yours, the way a fantasy table lets you open any
+  // manager's team and then come back.
+  const [viewing, setViewing] = useState<`0x${string}` | null>(null);
   const [sent, setSent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,6 +78,10 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
     }
   }
 
+  // Show the selected player if one was tapped, otherwise your own side once you have joined.
+  const shown = viewing ?? (joined ? wallet : null);
+  const isOwnSide = Boolean(shown && wallet && shown.toLowerCase() === wallet.toLowerCase());
+
   const copy = PHASE_COPY[phase];
 
   return (
@@ -117,7 +125,26 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
         </p>
       </section>
 
-      <Leaderboard standings={rows} you={wallet} showPayout={l.settled} />
+      {shown && (
+        <MySide
+          key={shown}
+          wallet={shown}
+          scoreBps={rows.find((r) => r.member.toLowerCase() === shown.toLowerCase())?.scoreBps ?? null}
+          heading={isOwnSide ? "Your side" : `${shortAddress(shown)}'s side`}
+          onBack={isOwnSide ? undefined : () => setViewing(null)}
+        />
+      )}
+
+      <div>
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-chalk-300">Table</h2>
+        <Leaderboard
+          standings={rows}
+          you={wallet}
+          showPayout={l.settled}
+          onSelect={setViewing}
+          selected={shown}
+        />
+      </div>
 
       {l.settled && podium.data && (
         <p className="rounded-2xl border border-turf-500/40 bg-turf-500/10 px-4 py-3 text-center text-sm">

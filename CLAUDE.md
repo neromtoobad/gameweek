@@ -270,7 +270,8 @@ Phase 3 — Trading
 
 Phase 4 — League loop
 - [x] 4.1 DONE (partly). Join works from the league page. Creating a league from the UI is not built; leagues are opened with the CreateLeague script, which is enough for the demo.
-- [x] 4.2 DONE. Leaderboard reads navStart onchain and live NAV per member, scores with the same capped ratio the contract settles on, and counts down to lock or settle.
+- [x] 4.2 DONE. Leaderboard reads navStart onchain and live NAV per member, scores with the same capped ratio the contract settles on, and counts down to lock or settle. Scores show as points.
+- [x] 4.2b DONE. Your side renders on the league page as a live team sheet with points per shirt. Tapping any row on the table opens that player's side, the way a fantasy table lets you look at any manager's team.
 - [x] 4.3 DONE in the UI. Lock and settle buttons appear when the phase allows, from any connected wallet. A standalone settle script is still worth having for a cron.
 - [ ] 4.4 Pot display, sponsor flow from treasury, podium banner (60/30/10) after settle.
 - [ ] 4.5 Basenames on every leaderboard row, hex fallback.
@@ -413,6 +414,9 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 - B20 precompiles cannot run on any local chain, so `./script/local-dev.sh` seeds anvil with mock tokens on real prices. It is the only way to build the league screens without spending mainnet money.
 - `Date.now()` during render is impure and the React lint rejects it. Anything time-dependent waits for `useNowSeconds` instead of falling back to the clock.
 - The leaderboard must apply the contract's score cap. Showing an uncapped score promises a standing settlement will not honour.
+- A side is read from the wallet, never from a record of what was picked, so it stays true for someone who traded outside the app. The contract is also the authority on which tokens count: `readRegisteredListings` reads them from the registry, which is why the league screens work against a local chain whose token addresses differ from mainnet's.
+- Points per shirt must be weighted by what the holding cost, not what it is worth now, or the parts do not sum to the team's own score. With any entry price missing the whole breakdown is dropped rather than shown disagreeing with the total.
+- Entry prices live in localStorage only, so `useSyncExternalStore` with a cached snapshot is the right shape. Reading storage during render, or syncing it with an effect, both fail the React lint for good reasons.
 - The public Base RPC throttles bursts, and viem reports a throttled batch as per-call failures that look exactly like reverts. A flatMap that drops failures silently blanks the whole board. lib/chain.ts `multicallResilient` retries only the failed entries; use it for every read.
 - Do not spend an RPC call on something address ordering already tells you. A pool's token0 is just the lower address, so USDC (0x83...) is always token0 against a B20 (0xb2...).
 - forge-std has no `.length` JSON path and no `[*]` projection, but `.listings[0].ticker` works.

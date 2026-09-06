@@ -9,6 +9,7 @@ import { FORMATION, POSITION_LABEL, SQUAD_SIZE, type Position } from "@/lib/squa
 import { useAccounts } from "@/lib/useAccounts";
 import { draftReadiness, submitDraft } from "@/lib/execute";
 import { txUrl } from "@/lib/config";
+import { saveSquad } from "@/lib/squadStore";
 import { usd } from "@/lib/format";
 import { SwipeCard } from "./SwipeCard";
 import { Pitch, type PitchSlot } from "./Pitch";
@@ -89,6 +90,19 @@ export function SquadBuilder() {
         makePick(c, i === captain ? captainStake : base, i === captain),
       );
       const id = await submitDraft(picks, leagueWallet);
+
+      // Remember what each shirt cost, so the league page can break the score down per stock. The
+      // chain knows the wallet's value but not what it paid, and this is the only copy.
+      saveSquad({
+        wallet: leagueWallet,
+        entries: filled.map((c, i) => ({
+          ticker: c.listing.ticker,
+          entryPrice: c.price.toString(),
+          stake: (i === captain ? captainStake : base).toString(),
+          isCaptain: i === captain,
+        })),
+      });
+
       setSubmission({ state: "sent", id });
     } catch (e) {
       const message = e instanceof Error ? e.message : "Draft failed";
