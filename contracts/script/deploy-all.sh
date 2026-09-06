@@ -48,9 +48,10 @@ echo "  deployer   $DEPLOYER"
 BAL=$(cast balance "$DEPLOYER" --rpc-url "$BASE_RPC_URL")
 BAL_ETH=$(cast to-unit "$BAL" ether)
 echo "  balance    $BAL_ETH ETH"
-# Deploying plus registration costs well under 0.001 ETH at Base gas prices. Ask for headroom.
-if [ "$(echo "$BAL_ETH < 0.002" | bc -l)" = "1" ]; then
-  fail "Balance too low. Send at least 0.002 ETH on Base to $DEPLOYER and run again."
+# Measured on Base at 0.006 gwei: both contracts plus registration is about 0.00003 ETH, roughly
+# seven cents. 0.0002 ETH is six times that, which covers retries and a few leagues.
+if [ "$(echo "$BAL_ETH < 0.0002" | bc -l)" = "1" ]; then
+  fail "Balance too low. Send at least 0.0002 ETH on Base to $DEPLOYER (about \$0.50) and run again."
 fi
 
 TREASURY="${TREASURY:-$DEPLOYER}"

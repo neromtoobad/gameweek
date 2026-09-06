@@ -6,6 +6,7 @@ import { readDexQuotes } from "@/lib/pools";
 import { readQuotes } from "@/lib/prices";
 import {
   DEFAULT_BUDGET,
+  MIN_STAKE,
   STAKES,
   buildDeck,
   canAfford,
@@ -32,7 +33,8 @@ export function SwipeDeck() {
   const leagueWallet = accounts?.league ?? null;
 
   const [index, setIndex] = useState(0);
-  const [stake, setStake] = useState<bigint>(STAKES[1]);
+  // Smallest stake by default: a $1 budget then covers a full three-pick gameweek with change.
+  const [stake, setStake] = useState<bigint>(STAKES[0]);
   const [picks, setPicks] = useState<Pick[]>([]);
   const [submission, setSubmission] = useState<Submission>({ state: "idle" });
 
@@ -112,7 +114,7 @@ export function SwipeDeck() {
                 : "border-line-800 text-chalk-300 hover:text-chalk-100"
             }`}
           >
-            {usd(s, { cents: false })}
+            {usd(s)}
           </button>
         ))}
       </div>
@@ -149,6 +151,14 @@ export function SwipeDeck() {
         )}
       </div>
 
+      {!done && !affordable && (
+        <p className="text-center text-xs text-chalk-500">
+          {remaining >= MIN_STAKE
+            ? "Pick a smaller stake, or buy the picks you have."
+            : "Budget spent. Buy your picks below."}
+        </p>
+      )}
+
       {!done && (
         <div className="flex gap-3">
           <button
@@ -164,7 +174,7 @@ export function SwipeDeck() {
             disabled={!affordable}
             className="flex-1 rounded-xl bg-turf-500 px-4 py-3 font-semibold text-pitch-950 transition hover:bg-turf-400 disabled:opacity-40"
           >
-            Draft {usd(stake, { cents: false })}
+            Draft {usd(stake)}
           </button>
         </div>
       )}

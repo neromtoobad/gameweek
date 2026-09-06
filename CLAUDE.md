@@ -34,6 +34,25 @@ US-based judges cannot legally hold these tokens. Give them a spectator view and
 
 Solo build, 5 days plus one live week, Claude Code.
 
+## Budget: $5 total
+
+Hard cap, and it shapes the product rather than just the ops. Measured onchain 2026-09-06 at
+0.006 gwei with ETH at $2,493: deploying both contracts is $0.066, registering all ten tokens is
+$0.007, a three-pick draft is $0.010, and locking plus settling a league is $0.007. The entire
+build, run several times over, stays under $0.15 of gas.
+
+USDC is the only real spend, and it is not consumed: a $1 draft becomes $1 of stock. The burn is the
+50 bps router fee plus 5 bps pool fee plus slippage, about 1% per round trip, so a $3 float can be
+drafted and unwound many times.
+
+Allocation: $0.75 of ETH to the deployer, $3 of USDC as the drafting float, $0.50 to the bot,
+$0.50 to seed a visible pot, $0.25 spare.
+
+This is why a stake is 25 cents and a gameweek costs a dollar. Lean into it: the Request for
+Builders opens on emerging markets shut out by high fees and minimums. A game you can play for a
+dollar is the answer to that, not a compromise forced by a small wallet. Never present the small
+numbers apologetically.
+
 ## Tech stack (pinned 2026-09-06)
 
 | Layer | Choice | Version |
@@ -152,6 +171,7 @@ Functions
 - `nav(address wallet) view returns (uint256 usd6)` — used by the app for cross-checks.
 - `setToken(token, feed)` — owner. Reads `decimals()` from the token and the feed, stores both, and precomputes the NAV scale divisor 10^(tokenDec + feedDec - 6). Reverts if that exponent would be negative.
 - Members with `navStart == 0` are skipped at settle.
+- Buy-ins stay at 0 for this build. Buy-in money is locked until settlement, so it cannot be recycled between gameweeks, which a $5 float cannot afford.
 
 Rules
 - OpenZeppelin `Ownable`, `SafeERC20`, `ReentrancyGuard` on settle.
@@ -343,8 +363,8 @@ Server-only secrets: ZEROEX_API_KEY, ANTHROPIC_API_KEY. Treasury and bot keys li
 
 ## Demo plan (what the judge sees, in order, under 90 seconds)
 
-1. Open gameweek.xyz on a phone. "Gameweek 2 - Lagos Bulls", five members, live leaderboard, pot $23.40, countdown "settles Friday 21:00 UTC".
-2. Tap Draft. Cards show the coach line and the weekend gap badge: NVDAc 0.6% under Friday close. Swipe right on NVDAc $8, TSLAc $6, MSTRc $6. First swipe shows the one Base Account approval that funds the league wallet. Swipes two and three land with no prompt. Budget ring drains.
+1. Open gameweek.xyz on a phone. "Gameweek 2 - Lagos Bulls", five members, live leaderboard, pot, countdown "settles Friday 21:00 UTC".
+2. Tap Draft. Cards show the coach line and the weekend gap badge: NVDAc 0.6% over Friday close. Swipe right on NVDAc, TSLAc and MSTRc at $0.25 each. First swipe shows the one Base Account approval that funds the league wallet. Swipes two and three land with no prompt. Budget ring drains from $1.00.
 3. Receipts tab: three Basescan links, Builder Code suffix highlighted, 0x fee visible in the treasury.
 4. Back on the leaderboard: our Basename row moves, the bot is sitting at #2 with its tag.
 5. Switch to the demo league that has already ended. Tap Settle. Transaction reads 13 Chainlink feeds, pays the pot in USDC to the winner. Show the winner's wallet: real stocks plus the pot.
@@ -359,6 +379,8 @@ Fallbacks: a pre-recorded 20-second clip of steps 2 to 5, pre-funded league wall
 Gameweek is fantasy football for stocks, except the picks are real. You and your friends each fund a small league wallet. On Sunday night, while Wall Street is closed and Base is open, you draft three stocks by swiping. Those swipes are real swaps on Base, into your own wallet. All week a leaderboard ranks you by return. Friday at the close, a contract reads Chainlink, splits the pot across the top three, and the next gameweek opens.
 
 There is a bot in every league, an agent with its own wallet that drafts on Sunday night. Beat it.
+
+A whole gameweek costs a dollar. Twenty-five cents a pick, gas sponsored, so this works for someone in Lagos with a phone and no brokerage account, which is most of the people tokenized stocks were supposed to reach.
 
 Under the hood every league wallet is a Base Account Sub Account funded by a Spend Permission, so there is one approval and then no popups, and the weekly cap is the responsible-gaming limit. Every swap carries our Builder Code and a 0x fee that funds the pots. Spot only, no leverage, nobody's principal is pooled.
 
@@ -406,7 +428,9 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 - No committing CLAUDE.md, .env files, keystores, or the treasury key.
 - No console.log, TODO, or commented-out code at submission.
 - No Claude API call in the live demo path. Coach lines come from the daily cache or the static fallback file.
-- No bot wallet balance above 50 USDC and 0.01 ETH. No bot key outside the Foundry keystore.
+- No bot wallet balance above $0.50 USDC and 0.0001 ETH. No bot key outside the Foundry keystore.
+- No league with a nonzero buy-in during this build. Buy-in money is locked until settlement and the float is too small to strand.
+- No single transaction that spends more than $1 of USDC. The whole build has $5.
 - No "join our league" ask to judges. Spectator page and video only.
 
 ## Status

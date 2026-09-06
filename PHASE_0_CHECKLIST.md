@@ -49,29 +49,55 @@ GitHub
 
 Read the safety block before creating anything.
 
+THE WHOLE BUILD COSTS $5. Everything below is sized to that.
+
+Measured onchain 2026-09-06 at 0.006 gwei with ETH at $2,493:
+
+| Action | Cost |
+|---|---|
+| Deploy both contracts | $0.066 |
+| Register all 10 tokens | $0.007 |
+| Create a league | $0.003 |
+| Draft 3 picks in one batch | $0.010 |
+| Lock and settle a league | $0.007 |
+| Everything above, several times over | under $0.15 |
+
+Gas is not the constraint. The only real spend is USDC, and even that is not consumed: a $1 draft
+becomes $1 of stock. The true burn is the 50 bps router fee plus the 5 bps pool fee plus slippage,
+so about 1% per round trip. A $3 float can be drafted and unwound many times.
+
+| What | Amount | Why |
+|---|---|---|
+| ETH to the deployer | 0.0003 ETH, about $0.75 | six times the measured cost of the entire build |
+| USDC to your Base Account | $3.00 | your own drafting float, recycled every gameweek |
+| USDC to the bot wallet | $0.50 | the bot's own budget, so it is a real player |
+| Pot seeding | $0.50 | so a settled pot is a visible number rather than a fraction of a cent |
+| Unallocated | $0.25 | mistakes |
+| **Total** | **$5.00** | |
+
 Safety
 - Private keys go into the Foundry keystore only (`~/.foundry/keystores`, outside the repo). Never into a file in the repo, never into the Claude Code chat, never into `.env`.
-- Every wallet below holds small amounts. Total at risk across the build: about 150 USDC and 0.02 ETH.
+- Nothing here risks more than the amounts in the table. The largest single loss possible is the USDC float, and only if a swap is set to accept terrible slippage.
 - The Base Account (passkey wallet) has no seed phrase. Turn on iCloud Keychain or Google Password Manager sync before creating it, or you can lose it with the device.
 - `.gitignore` must contain: `.env*`, `contracts/broadcast/**/dry-run/`, `contracts/cache/`, `contracts/out/`, `node_modules/`, `.next/`, `*.key`, `*.json.bak`.
 
-Deployer (deploys the contract, runs setToken)
-- [ ] `cast wallet new` in a terminal, copy the private key, then `cast wallet import deployer --interactive` and paste it. Clear the terminal (`clear && history -c` in zsh: `clear; history -p`).
-- [ ] Fund with 0.01 ETH on Base. Deploy plus 13 setToken calls costs cents; this is headroom.
+Deployer, which also acts as treasury (one wallet does both, to save funding a second)
+- [ ] `cast wallet new` in a terminal, copy the private key, then `cast wallet import deployer --interactive` and paste it. Clear the terminal afterwards.
+- [ ] Fund with 0.0003 ETH on Base. No USDC needed: it deploys, registers and settles, it never drafts.
 - [ ] `cast wallet address --account deployer` prints the address. Write it here: `DEPLOYER=`
 
-Treasury (receives the 0x swap fee, calls sponsor())
-- [ ] Same steps, keystore name `treasury`. Fund 0.003 ETH. Write it here and in `TREASURY_ADDRESS`: `TREASURY=`
+Bot, the agent player (Phase 5, skip until then)
+- [ ] Same steps, keystore name `bot`. Fund $0.50 USDC and 0.00005 ETH.  `BOT=`
 
-Bot (the agent player, swaps directly as an EOA)
-- [ ] Same steps, keystore name `bot`. Fund 0.005 ETH and 50 USDC. Write it here and in `BOT_ADDRESS`: `BOT=`
+Player 1, you
+- [ ] Base Account created with a passkey on your phone, on first connect to the app.
+- [ ] Fund the universal account with $3 USDC on Base. No ETH: the paymaster sponsors gas, which is
+      one of the things the demo is meant to show.
+- [ ] Write the universal address here: `PLAYER1=`
 
-Player 1 (you)
-- [ ] Base Account created with a passkey on your phone. It is created the first time you connect to the Phase 0 scratch page, or at any Base Account site. Write the universal address: `PLAYER1=`
-- [ ] Fund the universal account with 60 USDC on Base. League wallets pull from it through the Spend Permission.
-
-Player 2 (second real wallet for the leaderboard)
-- [ ] A second passkey identity: a different browser profile with a different passkey provider, a second device, or a friend who is eligible. Fund 20 USDC. `PLAYER2=`
+Player 2 and beyond
+- [ ] Friends self-fund about $1 each. Costs you nothing. A league needs two players to have a
+      leaderboard, and the bot can be the second if nobody is around.
 
 Getting USDC and ETH onto Base
 - [ ] Withdraw from any exchange that supports the Base network (Coinbase, Binance, Bybit, OKX). Network must say "Base", not Ethereum or Arbitrum. Send a $2 test first.
@@ -144,23 +170,23 @@ Fill the right column. Defaults are recommendations.
 |---|---|---|
 | Router fee | 50 bps, taken in USDC by GameweekRouter, capped at 100 bps onchain | |
 | Slippage | 100 bps, 150 for thin tickers | |
-| Default league budget | 20 USDC | |
-| Swipe sizes | 2 / 5 / 10 USDC | |
-| Minimum trade | 1 USDC | |
+| Default league budget | $1.00 per gameweek | |
+| Swipe sizes | $0.25 / $0.50 / $1.00 | |
+| Minimum trade | $0.10 | |
 | Friend league maxMembers | 20 | |
 | Public league maxMembers | 100 | |
 | Payout split | 60 / 30 / 10 | |
-| Buy-in | 0 by default, toggle, max 10 USDC | |
+| Buy-in | 0, and leave it at 0 for this build. The contract allows up to $10 but a buy-in is money you cannot recycle | |
 | Staleness tolerance, real league | 2 hours | |
 | Staleness tolerance, demo league | 7 days | |
 | forceSettle delay | 72 hours | |
 | Lock and settle time | Friday 21:00 UTC | |
 | Weekly Spend Permission cap shown to users | 20 to 100 USDC, UI hard max 250 | |
 | Funding mode | Auto Spend Permissions first; switch to explicit `requestSpendPermission` weekly cap only if it costs under 2 hours | |
-| Bot budget and sizing | 50 USDC total, 3 equal-weight picks, temperature 0 | |
+| Bot budget and sizing | $0.50 total, 3 equal-weight picks, temperature 0 | |
 | Bot draft time | Sunday 20:00 UTC | |
 | Ticker list | 10 draftable (COINc, CRCLc, INTCc have no supply and no pool). Confirm with `bun run check:pools` before the demo | |
-| Treasury sponsor policy | 100% of accrued fees into that week's leagues, split by member count | |
+| Treasury sponsor policy | accrued fees plus a one-off $0.50 seed, so the first pot is a visible number | |
 | Coach refresh | Once per day at 06:00 UTC, cached in a JSON file, static fallback for the demo | |
 | Data stored offchain | None. No accounts, no emails | |
 
@@ -194,7 +220,7 @@ Assets to pre-capture the week before: a 20-second screen recording of steps 2 t
 
 - [ ] Deadline, submission link and judging criteria are in CLAUDE.md. Milestones have real dates.
 - [ ] `cast wallet list` shows `deployer`, `treasury`, `bot`.
-- [ ] Balances on basescan: deployer ≥ 0.01 ETH, treasury ≥ 0.003 ETH, bot ≥ 0.005 ETH and 50 USDC, Player 1 universal account ≥ 60 USDC, Player 2 ≥ 20 USDC.
+- [ ] Balances on basescan: deployer ≥ 0.0003 ETH, Player 1 universal account ≥ $3 USDC. Bot only when you reach Phase 5. Total funded should be about $4.25.
 - [ ] The 0x curl returns `liquidityAvailable: true` for AAPLc.
 - [ ] `cast call decimals()` on AAPLc returns a number and it is written in CLAUDE.md.
 - [ ] The Chainlink call returns a positive price with a recent `updatedAt` on a weekday.

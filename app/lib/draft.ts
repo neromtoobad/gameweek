@@ -2,11 +2,17 @@ import type { DexQuote } from "./pools";
 import type { Quote } from "./prices";
 import type { Listing } from "./tokens";
 
-/** Stake sizes offered on the deck, in USDC units. */
-export const STAKES = [2_000_000n, 5_000_000n, 10_000_000n] as const;
+/**
+ * Stake sizes offered on the deck, in USDC units.
+ *
+ * Deliberately small. Base gas is a fraction of a cent and the router fee is 50 basis points, so a
+ * twenty-five cent pick is not a toy, it is the whole point: a gameweek costs about a dollar. That
+ * is the difference between a market a Lagos student can join and one they can only read about.
+ */
+export const STAKES = [250_000n, 500_000n, 1_000_000n] as const;
 
-/** Default weekly budget a player drafts with. */
-export const DEFAULT_BUDGET = 20_000_000n;
+/** Default weekly budget a player drafts with. One dollar buys a full three-pick gameweek. */
+export const DEFAULT_BUDGET = 1_000_000n;
 
 /** Router fee, in basis points. Mirrors GameweekRouter.feeBps and funds league pots. */
 export const FEE_BPS = 50n;
@@ -109,5 +115,10 @@ export const remainingBudget = (picks: Pick[], budget: bigint): bigint => {
 export const canAfford = (picks: Pick[], budget: bigint, stake: bigint): boolean =>
   remainingBudget(picks, budget) >= stake;
 
-/** Under this the fee and gas stop making sense against the size of the trade. */
-export const MIN_STAKE = 1_000_000n;
+/**
+ * Under this the fee and gas stop making sense against the size of the trade.
+ *
+ * At ten cents the 50 bps fee is $0.0005 and gas is about $0.004, so costs are already under 5% of
+ * the stake. Below that the arithmetic turns against the player.
+ */
+export const MIN_STAKE = 100_000n;

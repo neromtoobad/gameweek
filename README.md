@@ -70,6 +70,25 @@ their score. Shipped mitigations: scores are capped at 5x, and both NAVs are emi
 can be audited against the wallet's transfer history. A future version routes funding through the
 contract so deposits can be subtracted.
 
+## What it costs
+
+A gameweek is a dollar. Measured onchain on 2026-09-06 at 0.006 gwei with ETH at $2,493:
+
+| Action | Cost |
+|---|---|
+| Deploy both contracts | $0.066 |
+| Register all ten tokens | $0.007 |
+| Draft three picks in one batch | $0.010 |
+| Lock and settle a league | $0.007 |
+
+Gas is not the constraint on Base. The only real spend is the stake, and even that is not consumed:
+a $1 draft becomes $1 of stock. The cost of playing is the 50 basis point router fee, the pool's 5
+basis points, and slippage, so about 1% per round trip.
+
+That is the point rather than a limitation. The Request for Builders opens on emerging markets shut
+out of US equities by fees and minimums. Twenty-five cents a pick, with gas sponsored, is an answer
+to that.
+
 ## Build and test
 
 ```bash
