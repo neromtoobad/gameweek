@@ -77,10 +77,15 @@ chest, the way a fantasy football side shows a player. The ten kits were generat
 locked prompt so they share a camera angle, lighting setup and crop, then trimmed to transparent
 256px sprites and served from the app itself. Nothing on the pitch waits on an external image host.
 
-Each shirt carries its company's own logo as a crest, high on the left chest where a real kit
-carries one. The marks come from Simple Icons, which publishes each logo as a single vector path, so
-they are inlined rather than fetched and stay sharp from a 52px shirt to a 1200px share card. They
-are trademarks of their owners, used to identify the stock a shirt represents.
+Every stock plays in its own kit, and no two share a pattern: Amazon in a sash, Strategy in hoops,
+Meta in pinstripes, Microsoft quartered, SanDisk halved, Nvidia behind a chevron, SpaceX in a
+starfield. At shirt size on a crowded pitch, colour alone will not tell ten sides apart, which is
+the same reason real clubs do it.
+
+The kits are photographed with no lettering at all, so each company's own logo is printed large
+across the chest the way a kit carries its sponsor. The marks come from Simple Icons as single
+vector paths, inlined rather than fetched, so they stay sharp from a 52px shirt to a 1200px share
+card. They are trademarks of their owners, used to identify the stock a shirt represents.
 
 ## What it costs
 

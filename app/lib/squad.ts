@@ -32,22 +32,44 @@ type Kit = { position: Position; primary: string; secondary: string; text: strin
  * requests in the middle of a demo, and it sidesteps using company marks as our own artwork.
  */
 export const KITS: Record<string, Kit> = {
+  // primary/secondary drive the drawn fallback shirt. `text` is the colour the company's mark is
+  // printed in, chosen to read against that kit's own pattern.
   MSFTc: { position: "GK", primary: "#0F6CBD", secondary: "#F25022", text: "#FFFFFF" },
-  GOOGLc: { position: "GK", primary: "#4285F4", secondary: "#EA4335", text: "#FFFFFF" },
-  AAPLc: { position: "GK", primary: "#1D1D1F", secondary: "#A2AAAD", text: "#FFFFFF" },
+  GOOGLc: { position: "GK", primary: "#C8CDD2", secondary: "#4285F4", text: "#1A1A1A" },
+  AAPLc: { position: "GK", primary: "#1D1D1F", secondary: "#F5F5F7", text: "#FFFFFF" },
 
-  METAc: { position: "DEF", primary: "#0866FF", secondary: "#FFFFFF", text: "#FFFFFF" },
-  AMZNc: { position: "DEF", primary: "#FF9900", secondary: "#232F3E", text: "#232F3E" },
-  NVDAc: { position: "DEF", primary: "#76B900", secondary: "#1A1A1A", text: "#0B1A00" },
+  METAc: { position: "DEF", primary: "#1877F2", secondary: "#FFFFFF", text: "#FFFFFF" },
+  AMZNc: { position: "DEF", primary: "#232F3E", secondary: "#FF9900", text: "#FFFFFF" },
+  NVDAc: { position: "DEF", primary: "#76B900", secondary: "#1A1A1A", text: "#FFFFFF" },
 
-  TSLAc: { position: "FWD", primary: "#CC0000", secondary: "#FFFFFF", text: "#FFFFFF" },
-  MSTRc: { position: "FWD", primary: "#F7931A", secondary: "#1A1A1A", text: "#1A1A1A" },
-  SPCXc: { position: "FWD", primary: "#005288", secondary: "#FFFFFF", text: "#FFFFFF" },
-  SNDKc: { position: "FWD", primary: "#E31937", secondary: "#FFFFFF", text: "#FFFFFF" },
+  TSLAc: { position: "FWD", primary: "#CC0000", secondary: "#1A1A1A", text: "#FFFFFF" },
+  MSTRc: { position: "FWD", primary: "#F7931A", secondary: "#1A1A1A", text: "#FFFFFF" },
+  SPCXc: { position: "FWD", primary: "#0B1E3B", secondary: "#FFFFFF", text: "#FFFFFF" },
+  SNDKc: { position: "FWD", primary: "#3A3A3C", secondary: "#E31937", text: "#FFFFFF" },
 
   COINc: { position: "FWD", primary: "#0052FF", secondary: "#FFFFFF", text: "#FFFFFF" },
   CRCLc: { position: "DEF", primary: "#00D1B2", secondary: "#1A1A1A", text: "#0B1A17" },
   INTCc: { position: "GK", primary: "#0068B5", secondary: "#FFFFFF", text: "#FFFFFF" },
+};
+
+/**
+ * The kit each stock plays in.
+ *
+ * Every side needs to be recognisable at a glance on a crowded pitch, so no two share a pattern:
+ * a sash, hoops, pinstripes, quarters, halves, a chevron. Colour alone is not enough at 52px, and
+ * this is how real clubs solve the same problem.
+ */
+export const KIT_PATTERN: Record<string, string> = {
+  AAPLc: "Black with white raglan sleeves",
+  AMZNc: "Navy with an orange sash",
+  GOOGLc: "Silver with four coloured stripes",
+  METAc: "Blue and white pinstripes",
+  MSFTc: "Quartered in four colours",
+  MSTRc: "Orange with black hoops",
+  NVDAc: "Green with a black chevron",
+  SNDKc: "Graphite and scarlet halves",
+  SPCXc: "Navy starfield",
+  TSLAc: "Crimson with black shoulders",
 };
 
 const FALLBACK_KIT: Kit = {

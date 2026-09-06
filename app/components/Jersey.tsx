@@ -8,12 +8,15 @@ import { logoFor } from "@/lib/logos";
 /**
  * A stock's shirt.
  *
- * Every tradeable listing has a photographed kit in its company's colours with the ticker across
- * the chest. Shirts rather than logos: it is what fantasy football actually shows, and it keeps
- * company marks out of artwork we made.
+ * Every tradeable listing plays in its own kit: a sash, hoops, pinstripes, quarters, halves, a
+ * chevron. No two share a pattern, because at 52px on a crowded pitch colour alone will not tell
+ * them apart, which is the same reason real clubs do it.
+ *
+ * The kits are photographed with no lettering at all, so the company's own logo can be printed
+ * large across the chest the way a kit carries its sponsor.
  *
  * Anything without a photograph falls back to a drawn shirt, so a newly listed stock still appears
- * on the pitch the moment it is registered, rather than leaving a hole until someone shoots a kit.
+ * on the pitch the moment it is registered rather than leaving a hole.
  */
 export function Jersey({ ticker, size = 44 }: { ticker: string; size?: number }) {
   const label = ticker.replace(/c$/, "");
@@ -32,20 +35,19 @@ export function Jersey({ ticker, size = 44 }: { ticker: string; size?: number })
           style={{ display: "block", objectFit: "contain" }}
           priority={false}
         />
-        {/* The crest, high on the left chest where a real kit carries it. Both numbers were found
-            by sweeping positions against every shirt: the ticker is printed across the middle, and
-            anything lower or more central lands on top of it. */}
+        {/* The mark, printed large across the chest the way a kit carries its sponsor. These kits
+            are generated without any lettering precisely so the real logo can own the shirt. */}
         <span
           aria-hidden
           style={{
             position: "absolute",
-            left: "32%",
-            top: "19%",
+            left: "50%",
+            top: "42%",
             transform: "translate(-50%, -50%)",
             display: "block",
           }}
         >
-          <BrandMark ticker={ticker} size={Math.round(size * 0.2)} color={kitFor(ticker).text} />
+          <BrandMark ticker={ticker} size={Math.round(size * 0.36)} color={kitFor(ticker).text} />
         </span>
       </span>
     );
@@ -65,7 +67,6 @@ function BrandMarkPath({ ticker, fill }: { ticker: string; fill: string }) {
 function DrawnJersey({ ticker, size }: { ticker: string; size: number }) {
   const kit = kitFor(ticker);
   const label = ticker.replace(/c$/, "");
-  const fontSize = label.length > 4 ? 7.5 : label.length > 3 ? 9 : 10.5;
 
   return (
     <svg
@@ -85,21 +86,9 @@ function DrawnJersey({ ticker, size }: { ticker: string; size: number }) {
       <path d="M16 7 Q24 12 32 7 L29 6 Q24 9 19 6 Z" fill={kit.secondary} opacity="0.95" />
       <path d="M10 10 L5 18 L11 22 L13 19 Z" fill={kit.secondary} opacity="0.55" />
       <path d="M38 10 L43 18 L37 22 L35 19 Z" fill={kit.secondary} opacity="0.55" />
-      <g transform="translate(19 14) scale(0.42)">
+      <g transform="translate(16 18) scale(0.66)">
         <BrandMarkPath ticker={ticker} fill={kit.text} />
       </g>
-      <text
-        x="24"
-        y="34"
-        textAnchor="middle"
-        fontSize={fontSize}
-        fontWeight="800"
-        fill={kit.text}
-        letterSpacing="0.2"
-        style={{ fontFamily: "var(--font-geist-sans), system-ui, sans-serif" }}
-      >
-        {label}
-      </text>
     </svg>
   );
 }
