@@ -1,0 +1,23 @@
+# secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+keystore/
+
+# node
+node_modules/
+.next/
+out/
+.vercel/
+*.tsbuildinfo
+
+# foundry
+contracts/cache/
+contracts/out/
+contracts/broadcast/*/dry-run/
+contracts/lib/
+
+# os
+.DS_Store
