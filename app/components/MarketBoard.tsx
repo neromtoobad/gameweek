@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { marketState, readQuotes } from "@/lib/prices";
 import { LISTINGS } from "@/lib/tokens";
 import { ago, sharePrice } from "@/lib/format";
+import { BrandMark } from "./BrandMark";
 
 /**
  * The 13 listed stocks with live Chainlink prices.
@@ -46,9 +47,12 @@ export function MarketBoard() {
 
         {quotes.data?.map(({ listing, price }) => (
           <li key={listing.ticker} className="flex items-center justify-between px-4 py-3">
-            <div className="min-w-0">
-              <p className="truncate font-semibold">{listing.name}</p>
-              <p className="font-mono text-xs text-chalk-500">{listing.ticker}</p>
+            <div className="flex min-w-0 items-center gap-3">
+              <BrandMark ticker={listing.ticker} size={20} color="var(--color-chalk-300)" />
+              <div className="min-w-0">
+                <p className="truncate font-semibold">{listing.name}</p>
+                <p className="font-mono text-xs text-chalk-500">{listing.ticker}</p>
+              </div>
             </div>
             <div className="text-right">
               <p className="tnum font-semibold">{sharePrice(price)}</p>

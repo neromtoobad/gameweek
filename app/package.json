@@ -10,7 +10,8 @@
     "gen:abi": "bun run scripts/gen-abi.ts",
     "check:tokens": "bun run scripts/check-tokens.ts",
     "typecheck": "tsc --noEmit",
-    "check:pools": "bun run scripts/check-pools.ts"
+    "check:pools": "bun run scripts/check-pools.ts",
+    "gen:logos": "python3 scripts/gen-logos.py"
   },
   "dependencies": {
     "@base-org/account": "2.5.10",

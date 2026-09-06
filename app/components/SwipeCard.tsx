@@ -5,6 +5,7 @@ import type { Card } from "@/lib/draft";
 import { sharePrice, usd } from "@/lib/format";
 import { POSITION_LABEL } from "@/lib/squad";
 import { Jersey } from "./Jersey";
+import { BrandMark } from "./BrandMark";
 
 const SWIPE_THRESHOLD = 90;
 
@@ -99,11 +100,14 @@ export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, on
 
         <div className="flex items-center gap-3">
           <Jersey ticker={card.listing.ticker} size={40} />
-          <div>
+          <div className="min-w-0">
             <p className="font-mono text-xs text-chalk-500">
               {card.listing.ticker} · {POSITION_LABEL[card.position]}
             </p>
-            <h3 className="text-2xl font-semibold leading-tight">{card.listing.name}</h3>
+            <h3 className="flex items-center gap-2 text-2xl font-semibold leading-tight">
+              <BrandMark ticker={card.listing.ticker} size={20} color="var(--color-chalk-100)" />
+              <span className="truncate">{card.listing.name}</span>
+            </h3>
           </div>
         </div>
 

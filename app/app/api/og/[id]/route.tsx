@@ -4,6 +4,7 @@ import { readPortfolio } from "@/lib/prices";
 import { LISTINGS } from "@/lib/tokens";
 import { pointsFromScore } from "@/lib/points";
 import { kitFor } from "@/lib/squad";
+import { logoFor } from "@/lib/logos";
 
 export const runtime = "nodejs";
 
@@ -106,6 +107,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             {shirts.map((h) => {
               const ticker = h.listing.ticker;
               const kit = kitFor(ticker);
+              const logo = logoFor(ticker);
               return (
                 <div key={ticker} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
                   <div
@@ -116,13 +118,20 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                       background: kit.primary,
                       border: `4px solid ${kit.secondary}`,
                       display: "flex",
+                      flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
+                      gap: 6,
                       color: kit.text,
-                      fontSize: 26,
+                      fontSize: 22,
                       fontWeight: 800,
                     }}
                   >
+                    {logo && (
+                      <svg width="40" height="40" viewBox="0 0 24 24">
+                        <path d={logo.path} fill={kit.text} />
+                      </svg>
+                    )}
                     {ticker.replace(/c$/, "")}
                   </div>
                   <div style={{ fontSize: 22, color: "#7d9187" }}>

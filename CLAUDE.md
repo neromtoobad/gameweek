@@ -17,7 +17,9 @@ Gameweek makes people trade tokenized stocks every week:
 - Scores are shown as **points**, ten per percent. A 5.3% day is 53 points, the range a real fantasy gameweek lands in. Points are a presentation of the ratio the contract settles on, never a separate system.
 - Stocks wear **kits**, not logos: a photographed football shirt in the company's brand colour with the ticker across the chest. It is what fantasy football actually shows, and it keeps company marks out of artwork we made.
 - The ten kits were generated with Higgsfield (nano_banana_pro) from one locked prompt template, so they share a lighting setup, camera angle and crop. They live in `app/public/kits/` as trimmed 256px transparent PNGs, about 60KB each, and are served locally: no external image request sits in the demo path. Regenerating one means reusing the template in that file's history and changing only the colours and ticker.
-- Asking the model for real company logos was tried and dropped. It returns a plausible-looking but wrong mark, and a garbled logo is worse than none. The ticker wordmark renders perfectly and is the part that reads at 52px anyway.
+- Official company logos are on the kits, as crests. Generating them was the wrong route: the model returns a plausible but wrong mark. They come instead from Simple Icons, which publishes each company's own logo as a single 24x24 path, inlined into lib/logos.ts by `bun run gen:logos`. Vectors, so the same mark is sharp on a 52px shirt and a 1200px share card, and nothing waits on an image host.
+- Crest position is left 32%, top 19%, found by sweeping positions against every shirt. The ticker is printed across the middle of each photo, so anything lower or more central lands on top of it.
+- Marks are drawn in one colour, taken from each kit's `text`. Full-colour logos turn to mush at shirt size and fight the kit they sit on.
 - A listing with no photographed kit falls back to a drawn SVG shirt, so a newly registered stock appears on the pitch immediately rather than leaving a hole.
 - A round is **24 hours**, locking and settling at 21:00 UTC. That is the US close, the one moment of the day the Chainlink equity feeds are still publishing, so it is the only time a league can be scored against fresh prices.
 - Rounds only run into a trading day. Outside market hours the feeds hold their last price, so a Saturday round would score everyone zero. Friday's close therefore runs to Monday's, which turns the weekend into the long window where sides are picked for the week ahead. Sunday is still team sheet night.
@@ -331,7 +333,6 @@ Cut, and do not reopen before the deadline:
 - Create-a-league from the UI. The script is enough.
 - Basenames, pot transparency page.
 - Weekend scoring off the pool TWAP. A real contract change, and rounds already avoid weekends.
-- Real company logos on the kits. Colours and tickers read fine.
 
 ## Commands
 
