@@ -226,7 +226,7 @@ Phase 1 — Contract
 - [x] 1.1 DONE. Foundry project at contracts/, OpenZeppelin v5.1.0, IAggregatorV3 interface, config/tokens.json.
 - [x] 1.2 DONE. Gameweek.sol written per spec.
 - [x] 1.3 DONE. 38 unit tests and 6 fork tests green. Gas at 50 members: lock 1.72M, settle 578K.
-- [ ] 1.4 Deploy to Base mainnet with the keystore account, verify on Basescan, then run ./script/register-tokens.sh for the 10 live tickers. Record address here: `GAMEWEEK=`
+- [ ] 1.4 Deploy. Fully scripted: `cd contracts && BASE_RPC_URL=... ./script/deploy-all.sh` preflights, deploys both contracts, verifies them, registers the 10 tradeable tickers in one call, writes app/.env.local and reads the result back. The only missing input is a funded keystore account. Record here: `GAMEWEEK=` `ROUTER=`
 - [ ] 1.5 Create league #1 with a 7-day staleness tolerance (demo league) and league #2 with real Friday times.
 
 Phase 2 — App shell
@@ -297,8 +297,12 @@ forge test -vvv
 forge test --fork-url $BASE_RPC_URL --match-contract Fork -vvv
 cast wallet import deployer --interactive
 # two steps: forge cannot simulate B20 precompiles, so registration goes through cast
+# one command: preflight, deploy both contracts, verify, register tokens, write app/.env.local
+BASE_RPC_URL=... BASESCAN_API_KEY=... ACCOUNT=deployer ./script/deploy-all.sh
+
+# or by hand
 forge script script/Deploy.s.sol:Deploy --rpc-url $BASE_RPC_URL --account deployer --broadcast --verify --etherscan-api-key $BASESCAN_API_KEY
-./script/register-tokens.sh 0xDeployedLeagueAddress
+./script/register-tokens.sh 0xDeployedGameweekAddress
 LEAGUE=0x... NAME="Lagos Bulls" START=<epoch> END=<epoch> TOLERANCE=7200 MAX_MEMBERS=20 \
   forge script script/Deploy.s.sol:CreateLeague --rpc-url $BASE_RPC_URL --account deployer --broadcast
 cast call 0xb200000000000000000000C2e324d24d7eEcd1fb "decimals()(uint8)" --rpc-url $BASE_RPC_URL
@@ -372,7 +376,7 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 - Sub Account owner key lives in the user's browser storage. Trades are signed in the user's session, not by a server. Clearing site data loses the key; the universal account still owns the funds.
 - Auto Spend Permissions prompt once on the first transaction that needs USDC from the universal account, then reuse the granted allowance. Do not describe the flow as "zero prompts", it is "one prompt, then none".
 - Paymaster sponsorship needs the contract allowlist set in the CDP portal: Gameweek, USDC, the 0x AllowanceHolder.
-- `forge script` simulates locally before it broadcasts, so a script that calls `setToken` (which reads `decimals()` from a B20 address) dies with `EvmError: OpcodeNotFound` even with --broadcast. Deploy and registration are therefore two steps: `forge script Deploy` for the contract, then `./script/register-tokens.sh` which uses `cast send` and goes straight to the node.
+- `forge script` simulates locally before it broadcasts, so a script that calls `setToken` (which reads `decimals()` from a B20 address) dies with `EvmError: OpcodeNotFound` even with --broadcast. Deploy and registration are therefore two steps: `forge script Deploy` for the contracts, then `./script/register-tokens.sh`, which uses one `cast send` of `setTokens` straight to the node. Ten separate `setToken` calls would mean ten password prompts and a contract that can end up half registered.
 - forge-std JSON paths support `.listings[0].ticker` but not `.listings.length` or a `[*]` projection. config/tokens.json carries an explicit `count` field for that reason.
 - B20 tokens are node precompiles, not deployed contracts. `cast code` on a B20 address returns a single placeholder byte. A live RPC executes them natively, but a Foundry fork has nothing to run, so every B20 call on a fork burns the gas limit and reverts. Fork tests must `vm.etch` an 8-decimal ERC20 at the B20 address; Chainlink feeds are ordinary contracts and work on a fork as-is. Anvil cannot simulate B20 at all. Verified and pinned by test_b20TokensHaveNoBytecode.
 - `setToken` reads `decimals()` from the token, so in a fork test the etch must happen before the registration call, not after.
