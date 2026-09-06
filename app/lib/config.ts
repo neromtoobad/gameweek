@@ -15,6 +15,14 @@ export const GAMEWEEK_ROUTER = (process.env.NEXT_PUBLIC_GAMEWEEK_ROUTER ?? "") a
   | `0x${string}`
   | "";
 
+/**
+ * Base App identifier, from base.dev.
+ *
+ * Published as a meta tag on every page. It is how Base App recognises this site as a registered
+ * app and attributes it on the weekly leaderboards. Public, not a secret.
+ */
+export const BASE_APP_ID = "6a9cff53eae4ee0ceaa644ad";
+
 /** Sunday Bot's wallet, so the table can mark it. It plays like anyone else, it is just not human. */
 export const BOT_ADDRESS = (process.env.NEXT_PUBLIC_BOT_ADDRESS ?? "").toLowerCase();
 
