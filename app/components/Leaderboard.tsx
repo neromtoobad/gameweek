@@ -2,6 +2,7 @@
 
 import { addressUrl } from "@/lib/config";
 import { shortAddress, usd } from "@/lib/format";
+import { formatPoints, pointsFromScore } from "@/lib/points";
 import type { Standing } from "@/lib/leagues";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -62,10 +63,13 @@ export function Leaderboard({
             </div>
 
             <div className="text-right">
-              <p className={`tnum text-sm font-semibold ${tone}`}>
-                {delta === null ? "—" : `${delta > 0 ? "+" : ""}${delta.toFixed(2)}%`}
+              <p className={`tnum text-base font-bold ${tone}`}>
+                {s.scoreBps === null ? "—" : formatPoints(pointsFromScore(s.scoreBps))}
+                <span className="ml-1 text-[10px] font-normal text-chalk-500">pts</span>
               </p>
-              <p className="tnum text-[11px] text-chalk-500">{usd(s.navNow)}</p>
+              <p className="tnum text-[11px] text-chalk-500">
+                {delta === null ? usd(s.navNow) : `${delta > 0 ? "+" : ""}${delta.toFixed(2)}% · ${usd(s.navNow)}`}
+              </p>
             </div>
           </li>
         );

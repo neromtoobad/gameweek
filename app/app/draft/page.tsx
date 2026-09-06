@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SwipeDeck } from "@/components/SwipeDeck";
+import { SquadBuilder } from "@/components/SquadBuilder";
 
 export const metadata = { title: "Draft · Gameweek" };
 
@@ -10,10 +10,10 @@ export default function DraftPage() {
         <Link href="/" className="text-sm text-chalk-500 transition hover:text-chalk-300">
           ← Gameweek
         </Link>
-        <span className="text-sm font-semibold">Draft</span>
+        <span className="text-sm font-semibold">Pick your side</span>
       </header>
 
-      <SwipeDeck />
+      <SquadBuilder />
     </main>
   );
 }

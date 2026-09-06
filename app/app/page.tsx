@@ -20,7 +20,7 @@ export default function Home() {
         href="/draft"
         className="rounded-xl bg-turf-500 px-4 py-3 text-center font-semibold text-pitch-950 transition hover:bg-turf-400"
       >
-        Open the draft
+        Pick your side
       </Link>
 
       <AccountBar />

@@ -2,7 +2,7 @@
 
 import { useNowSeconds } from "@/lib/useNow";
 import { countdown } from "@/lib/format";
-import { gameweekNumber, isDraftWindow, nextCloseSeconds } from "@/lib/gameweek";
+import { isDraftWindow, matchdayNumber, nextCloseSeconds } from "@/lib/gameweek";
 
 export function NextDraft() {
   const now = useNowSeconds();
@@ -13,15 +13,15 @@ export function NextDraft() {
         {now === null
           ? " "
           : isDraftWindow(now)
-            ? `Gameweek ${gameweekNumber(now)} · Draft night`
-            : `Gameweek ${gameweekNumber(now)}`}
+            ? `Matchday ${matchdayNumber(now)} · Team sheets open`
+            : `Matchday ${matchdayNumber(now)} · Live`}
       </p>
       <h1 className="mt-1 text-2xl font-semibold leading-tight">
-        Fantasy football, except the picks are real stocks.
+        Fantasy football, except the players are real stocks.
       </h1>
       <p className="mt-2 text-sm leading-relaxed text-chalk-300">
-        Draft three from the board. They are bought into your own wallet on Base. A leaderboard ranks
-        your league all week and the pot pays the top three.
+        Pick five in a 1-2-2, name a captain, and they are bought into your own wallet on Base. Every
+        percent they move is ten points. Twenty-four hours, then the pot pays the top three.
       </p>
 
       <div className="mt-4 flex items-baseline gap-2">

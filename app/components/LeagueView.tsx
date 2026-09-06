@@ -7,14 +7,14 @@ import { readLeague, readPodium, readStandings, phaseOf } from "@/lib/leagues";
 import { useAccounts } from "@/lib/useAccounts";
 import { sendLeagueAction } from "@/lib/leagueActions";
 import { useNowSeconds } from "@/lib/useNow";
-import { gameweekNumber } from "@/lib/gameweek";
+import { matchdayNumber } from "@/lib/gameweek";
 import { countdown, usd } from "@/lib/format";
 import { txUrl } from "@/lib/config";
 import { Leaderboard } from "./Leaderboard";
 
 const PHASE_COPY = {
-  drafting: { label: "Drafting", hint: "Picks are open until the league locks." },
-  running: { label: "Running", hint: "Locked. The table moves with the market until Friday." },
+  drafting: { label: "Team sheets", hint: "Sides can be picked until the round locks." },
+  running: { label: "Live", hint: "Locked. Every percent your side moves is ten points." },
   settling: { label: "Ready", hint: "The week is over. Anyone can settle it." },
   settled: { label: "Settled", hint: "The pot has been paid." },
 } as const;
@@ -82,7 +82,7 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-wide text-turf-400">
-              Gameweek {gameweekNumber(now)}
+              Matchday {matchdayNumber(now)}
             </p>
             <h1 className="mt-0.5 text-2xl font-semibold leading-tight">{l.name}</h1>
           </div>
@@ -143,7 +143,7 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
               href="/draft"
               className="rounded-xl bg-turf-500 px-4 py-3 text-center font-semibold text-pitch-950 transition hover:bg-turf-400"
             >
-              Draft your picks
+              Pick your side
             </Link>
           )}
 

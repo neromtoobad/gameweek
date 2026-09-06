@@ -12,8 +12,13 @@ Hackathon: Base Builder Quest, "Request for Builders: Tokenized Stocks". $5,000 
 
 Gameweek makes people trade tokenized stocks every week:
 - A league is 3 to 20 friends who join by invite link. Each member has a league wallet (a Base Account Sub Account) funded with a small USDC budget.
-- The week locks Friday 21:00 UTC (US close, Chainlink feeds fresh). Over the weekend, while TradFi is closed, members draft: swipe to buy any of the 13 tickers with real swaps on Base. Sunday night is draft night.
-- A live leaderboard ranks members by return on their league wallet all week. The next Friday 21:00 UTC the contract settles from Chainlink, pays the pot to the winner, and a new week opens. Re-drafting every week is the trading volume.
+- A player fields **five stocks in a 1-2-2**, the way a fantasy football side is picked. Every stock has a position based on how hard it moves: keepers are the steadiest names, forwards the ones that swing. You cannot field five forwards even when momentum says you should, and that constraint is the game.
+- One pick wears the **armband**. The captain's stake is doubled, so their move counts twice. It is a real position size, not a scoring multiplier bolted on, so the chain settles exactly what the table shows.
+- Scores are shown as **points**, ten per percent. A 5.3% day is 53 points, the range a real fantasy gameweek lands in. Points are a presentation of the ratio the contract settles on, never a separate system.
+- Stocks wear **kits**, not logos: a shirt in the company's brand colour with the ticker across it. It is what fantasy football actually shows, it needs no external image request mid-demo, and it avoids using company marks as our own artwork.
+- A round is **24 hours**, locking and settling at 21:00 UTC. That is the US close, the one moment of the day the Chainlink equity feeds are still publishing, so it is the only time a league can be scored against fresh prices.
+- Rounds only run into a trading day. Outside market hours the feeds hold their last price, so a Saturday round would score everyone zero. Friday's close therefore runs to Monday's, which turns the weekend into the long window where sides are picked for the week ahead. Sunday is still team sheet night.
+- Settling pays the pot 60/30/10 and the next matchday opens. Re-picking every day is the trading volume.
 - Every swap carries our Builder Code and a 0x affiliate fee. Fees fund the pots. Nobody's principal is pooled. Spot only, no leverage.
 
 Why it wins on the brief: real B20 swaps on every action, a weekly ritual that repeats, stacks four Base primitives (B20 stocks, Base Account Sub Accounts + Spend Permissions, Paymaster, Builder Codes), and does the one thing Robinhood cannot: a stock draft on a Sunday.

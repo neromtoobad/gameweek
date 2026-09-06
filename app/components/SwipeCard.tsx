@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import type { Card } from "@/lib/draft";
 import { sharePrice, usd } from "@/lib/format";
+import { POSITION_LABEL } from "@/lib/squad";
+import { Jersey } from "./Jersey";
 
 const SWIPE_THRESHOLD = 90;
 
@@ -91,14 +93,21 @@ export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, on
                 : "border-chalk-500 text-chalk-500"
             }`}
           >
-            {intent === "draft" ? "Draft" : "Skip"}
+            {intent === "draft" ? "Pick" : "Next"}
           </span>
         )}
 
-        <p className="font-mono text-xs text-chalk-500">{card.listing.ticker}</p>
-        <h3 className="mt-0.5 text-2xl font-semibold">{card.listing.name}</h3>
+        <div className="flex items-center gap-3">
+          <Jersey ticker={card.listing.ticker} size={40} />
+          <div>
+            <p className="font-mono text-xs text-chalk-500">
+              {card.listing.ticker} · {POSITION_LABEL[card.position]}
+            </p>
+            <h3 className="text-2xl font-semibold leading-tight">{card.listing.name}</h3>
+          </div>
+        </div>
 
-        <p className="tnum mt-4 text-4xl font-semibold">{sharePrice(card.price * 100n)}</p>
+        <p className="tnum mt-3 text-4xl font-semibold">{sharePrice(card.price * 100n)}</p>
 
         {gapBps !== null && (
           <p className="mt-1.5 text-sm">
@@ -123,9 +132,6 @@ export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, on
           </div>
         </div>
 
-        {!affordable && (
-          <p className="mt-3 text-xs text-down">Not enough budget left for this stake.</p>
-        )}
       </div>
     </div>
   );

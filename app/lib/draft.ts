@@ -1,29 +1,30 @@
 import type { DexQuote } from "./pools";
 import type { Quote } from "./prices";
 import type { Listing } from "./tokens";
+import { SQUAD_SIZE, positionOf, type Position } from "./squad";
+import { splitBudget } from "./points";
 
 /**
- * Stake sizes offered on the deck, in USDC units.
+ * Default budget for a round. One dollar fields a full squad.
  *
  * Deliberately small. Base gas is a fraction of a cent and the router fee is 50 basis points, so a
- * twenty-five cent pick is not a toy, it is the whole point: a gameweek costs about a dollar. That
- * is the difference between a market a Lagos student can join and one they can only read about.
+ * sixteen cent pick is not a toy, it is the point: the Request for Builders opens on markets shut
+ * out of US equities by fees and minimums, and a game you can play for a dollar is an answer to
+ * that.
  */
-export const STAKES = [250_000n, 500_000n, 1_000_000n] as const;
-
-/** Default weekly budget a player drafts with. One dollar buys a full three-pick gameweek. */
 export const DEFAULT_BUDGET = 1_000_000n;
 
 /** Router fee, in basis points. Mirrors GameweekRouter.feeBps and funds league pots. */
 export const FEE_BPS = 50n;
 
-/** How far the fill may drift before the swap reverts. */
+/** How far a fill may drift before the swap reverts. */
 export const SLIPPAGE_BPS = 100n;
 
 const BPS = 10_000n;
 
 export type Card = {
   listing: Listing;
+  position: Position;
   pool: `0x${string}`;
   /** Live pool price, USDC per share with 6 decimals. */
   price: bigint;
@@ -55,6 +56,7 @@ export function buildDeck(dex: DexQuote[], oracle: Quote[]): Card[] {
           : null;
       return {
         listing: q.listing,
+        position: positionOf(q.listing.ticker),
         pool: q.pool,
         price: q.price,
         close,
@@ -68,6 +70,8 @@ export function buildDeck(dex: DexQuote[], oracle: Quote[]): Card[] {
 export type Pick = {
   ticker: string;
   listing: Listing;
+  position: Position;
+  isCaptain: boolean;
   pool: `0x${string}`;
   /** USDC committed, 6 decimals. */
   stake: bigint;
@@ -91,11 +95,13 @@ export function quoteStake(card: Card, stake: bigint) {
   return { afterFee, expectedShares, minShares };
 }
 
-export function makePick(card: Card, stake: bigint): Pick {
+export function makePick(card: Card, stake: bigint, isCaptain: boolean): Pick {
   const { expectedShares, minShares } = quoteStake(card, stake);
   return {
     ticker: card.listing.ticker,
     listing: card.listing,
+    position: card.position,
+    isCaptain,
     pool: card.pool,
     stake,
     expectedShares,
@@ -103,22 +109,8 @@ export function makePick(card: Card, stake: bigint): Pick {
   };
 }
 
+/** What each pick is worth, given the captain takes a double share. */
+export const squadStakes = (budget: bigint = DEFAULT_BUDGET) => splitBudget(budget, SQUAD_SIZE);
+
 export const totalStaked = (picks: Pick[]): bigint =>
   picks.reduce((sum, p) => sum + p.stake, 0n);
-
-export const remainingBudget = (picks: Pick[], budget: bigint): bigint => {
-  const left = budget - totalStaked(picks);
-  return left > 0n ? left : 0n;
-};
-
-/** A stake is offerable only if the budget still covers it. */
-export const canAfford = (picks: Pick[], budget: bigint, stake: bigint): boolean =>
-  remainingBudget(picks, budget) >= stake;
-
-/**
- * Under this the fee and gas stop making sense against the size of the trade.
- *
- * At ten cents the 50 bps fee is $0.0005 and gas is about $0.004, so costs are already under 5% of
- * the stake. Below that the arithmetic turns against the player.
- */
-export const MIN_STAKE = 100_000n;
