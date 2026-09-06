@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-/// @notice Minimal Chainlink AggregatorV3 surface used by Sunday League.
+/// @notice Minimal Chainlink AggregatorV3 surface used by Gameweek.
 interface IAggregatorV3 {
     function decimals() external view returns (uint8);
 

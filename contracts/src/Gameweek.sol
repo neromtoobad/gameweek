@@ -8,7 +8,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IAggregatorV3} from "./interfaces/IAggregatorV3.sol";
 
-/// @title Sunday League
+/// @title Gameweek
 /// @notice Weekly fantasy leagues scored on real Coinbase Tokenized Stocks (B20) held in each
 ///         player's own wallet. The contract never custodies a player's stocks. It only records a
 ///         start-of-week net asset value per player, ranks players at the end of the week from
@@ -29,7 +29,7 @@ import {IAggregatorV3} from "./interfaces/IAggregatorV3.sol";
 ///      MAX_SCORE_BPS, and lock/settle NAVs are emitted so anyone can audit a result against the
 ///      wallet's transfer history. A future version routes all funding through this contract, or
 ///      escrows league wallets, so deposits can be subtracted from the score.
-contract SundayLeague is Ownable, ReentrancyGuard {
+contract Gameweek is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     // ---------------------------------------------------------------- constants

@@ -1,16 +1,16 @@
-# Sunday League — project brain
+# Gameweek — project brain
 
 Read this first every session. Update the phase checkboxes and "things that burned us" before ending a session.
 
 ## One line
 
-A weekly fantasy league web app where the picks are real Coinbase Tokenized Stocks, bought into the player's own wallet on Base.
+A weekly fantasy league web app where the picks are real Coinbase Tokenized Stocks, bought into the player's own wallet on Base. A gameweek runs Friday close to Friday close; draft night is the Sunday in between.
 
 ## What we are building and why it qualifies
 
 Hackathon: Base Builder Quest, "Request for Builders: Tokenized Stocks". $5,000 prize pool. Brief: build a project that helps people trade or use Coinbase Tokenized Stocks on Base. Deadline, judging criteria and submission form: UNKNOWN, fill in from the @base / @buildonbase X posts before Phase 1.
 
-Sunday League makes people trade tokenized stocks every week:
+Gameweek makes people trade tokenized stocks every week:
 - A league is 3 to 20 friends who join by invite link. Each member has a league wallet (a Base Account Sub Account) funded with a small USDC budget.
 - The week locks Friday 21:00 UTC (US close, Chainlink feeds fresh). Over the weekend, while TradFi is closed, members draft: swipe to buy any of the 13 tickers with real swaps on Base. Sunday night is draft night.
 - A live leaderboard ranks members by return on their league wallet all week. The next Friday 21:00 UTC the contract settles from Chainlink, pays the pot to the winner, and a new week opens. Re-drafting every week is the trading volume.
@@ -111,7 +111,7 @@ Mobile or desktop browser
        ├─ /api/coach      -> cached daily one-liners per ticker + "draft for me" picks (Claude, server-side)
        └─ /api/og/[id]    -> recap share card image
 Base mainnet
-  ├─ SundayLeague.sol   create/join/lock/sponsor/settle, reads B20 balances + Chainlink
+  ├─ Gameweek.sol   create/join/lock/sponsor/settle, reads B20 balances + Chainlink
   ├─ 13 B20 tokens, 13 Chainlink feeds, USDC
   └─ 0x AllowanceHolder -> Aerodrome and other pools
 Treasury EOA           receives 0x swapFee (USDC), pushes it into pots with sponsor()
@@ -122,7 +122,7 @@ Scoring: NAV(wallet) = USDC balance + sum of balanceOf(token) * feedPrice / 10^(
 
 Pot: optional buy-in (default 0) + `sponsor()` top-ups. The treasury pushes accrued 0x fees into pots. Say this plainly in the README: fee routing is operated by us in v1, buy-ins and payouts are trust-minimised in the contract.
 
-## Contract spec: contracts/src/SundayLeague.sol
+## Contract spec: contracts/src/Gameweek.sol
 
 State
 - `struct League { string name; uint64 startTime; uint64 endTime; uint32 stalenessTolerance; uint16 maxMembers; uint128 buyIn; uint128 pot; bool locked; bool settled; address[3] podium; address[] members; }`
@@ -162,9 +162,9 @@ base/
   BUILD_GUIDE.md             day-by-day steps (delete before submission)
   README.md                  product page: pitch, architecture, live tx links, AI tools used
   contracts/                 Foundry project
-    src/SundayLeague.sol
+    src/Gameweek.sol
     src/interfaces/AggregatorV3Interface.sol
-    test/SundayLeague.t.sol
+    test/Gameweek.t.sol
     test/Fork.t.sol
     script/Deploy.s.sol      deploys + setToken for 13 tokens from a JSON config
     config/tokens.json       token/feed addresses (the table above)
@@ -212,9 +212,9 @@ Phase 0 — Day-0 proofs (all must pass before writing product code)
 
 Phase 1 — Contract
 - [x] 1.1 DONE. Foundry project at contracts/, OpenZeppelin v5.1.0, IAggregatorV3 interface, config/tokens.json.
-- [x] 1.2 DONE. SundayLeague.sol written per spec.
+- [x] 1.2 DONE. Gameweek.sol written per spec.
 - [x] 1.3 DONE. 38 unit tests and 6 fork tests green. Gas at 50 members: lock 1.72M, settle 578K.
-- [ ] 1.4 Deploy to Base mainnet with the keystore account, verify on Basescan, then run ./script/register-tokens.sh for the 10 live tickers. Record address here: `SUNDAY_LEAGUE=`
+- [ ] 1.4 Deploy to Base mainnet with the keystore account, verify on Basescan, then run ./script/register-tokens.sh for the 10 live tickers. Record address here: `GAMEWEEK=`
 - [ ] 1.5 Create league #1 with a 7-day staleness tolerance (demo league) and league #2 with real Friday times.
 
 Phase 2 — App shell
@@ -243,7 +243,7 @@ Phase 4 — League loop
 
 Phase 5 — Ritual (only after Phase 4 is demoable end to end)
 - [ ] 5.1 Sunday draft-night copy, countdowns, "weekend gap" badge showing DEX price vs Friday close.
-- [ ] 5.2 Share card: "I'm #2 in Lagos Bulls, 3 picks, +1.8%" as an OG image with share-to-X and WhatsApp buttons carrying the invite link.
+- [ ] 5.2 Share card: "Gameweek 2, #2 in Lagos Bulls, +1.8%" as an OG image with share-to-X and WhatsApp buttons carrying the invite link.
 - [ ] 5.3 Bot player: scripts/bot.ts joins every league the bot is invited to, drafts Sunday 20:00 UTC (Claude picks 3 with weights, 0x swaps from the bot EOA), leaderboard row shows a bot tag. Budget ≤ 50 USDC.
 - [ ] 5.4 Coach card: one line per ticker generated daily and cached (Claude, server-side), static fallback file for the demo. "Draft for me" takes a one-sentence thesis and executes 3 swaps in one wallet_sendCalls batch. Labelled "information, not advice".
 - [ ] 5.5 Dividend badge: read MultiplierUpdated events for held tokens, show "dividend applied" on the holding.
@@ -292,7 +292,7 @@ LEAGUE=0x... NAME="Lagos Bulls" START=<epoch> END=<epoch> TOLERANCE=7200 MAX_MEM
 cast call 0xb200000000000000000000C2e324d24d7eEcd1fb "decimals()(uint8)" --rpc-url $BASE_RPC_URL
 cast call 0xb200000000000000000000C2e324d24d7eEcd1fb "balanceOf(address)(uint256)" <wallet> --rpc-url $BASE_RPC_URL
 cast call 0x787f13dEa48Db0897CbCDD985de77809D837F988 "latestRoundData()(uint80,int256,uint256,uint256,uint80)" --rpc-url $BASE_RPC_URL
-cast send $SUNDAY_LEAGUE "setToken(address,address)" <token> <feed> --rpc-url $BASE_RPC_URL --account deployer
+cast send $GAMEWEEK "setToken(address,address)" <token> <feed> --rpc-url $BASE_RPC_URL --account deployer
 ```
 
 App
@@ -316,7 +316,7 @@ Env vars (app/.env.local, never committed)
 NEXT_PUBLIC_URL=
 NEXT_PUBLIC_PAYMASTER_URL=
 NEXT_PUBLIC_BUILDER_CODE_SUFFIX=
-NEXT_PUBLIC_SUNDAY_LEAGUE=
+NEXT_PUBLIC_GAMEWEEK=
 ZEROEX_API_KEY=
 ANTHROPIC_API_KEY=
 TREASURY_ADDRESS=
@@ -327,12 +327,12 @@ Server-only secrets: ZEROEX_API_KEY, ANTHROPIC_API_KEY. Treasury and bot keys li
 
 ## Demo plan (what the judge sees, in order, under 90 seconds)
 
-1. Open sundayleague.xyz on a phone. League "Lagos Bulls", week 2, five members, live leaderboard, pot $23.40, countdown "settles Friday 21:00 UTC".
+1. Open gameweek.xyz on a phone. "Gameweek 2 - Lagos Bulls", five members, live leaderboard, pot $23.40, countdown "settles Friday 21:00 UTC".
 2. Tap Draft. Cards show the coach line and the weekend gap badge: NVDAc 0.6% under Friday close. Swipe right on NVDAc $8, TSLAc $6, MSTRc $6. First swipe shows the one Base Account approval that funds the league wallet. Swipes two and three land with no prompt. Budget ring drains.
 3. Receipts tab: three Basescan links, Builder Code suffix highlighted, 0x fee visible in the treasury.
 4. Back on the leaderboard: our Basename row moves, the bot is sitting at #2 with its tag.
 5. Switch to the demo league that has already ended. Tap Settle. Transaction reads 13 Chainlink feeds, pays the pot in USDC to the winner. Show the winner's wallet: real stocks plus the pot.
-6. Close on the share card: "I'm #1 in Lagos Bulls, +2.1% this week" with the invite link, posted to X.
+6. Close on the share card: "I won Gameweek 2 in Lagos Bulls, +2.1%" with the invite link, posted to X.
 
 Fallbacks: a pre-recorded 20-second clip of steps 2 to 5, pre-funded league wallets, a second league already locked so settle works on any day (7-day staleness tolerance), and pre-fetched quotes cached for 60 seconds if 0x is slow.
 
@@ -340,13 +340,13 @@ Fallbacks: a pre-recorded 20-second clip of steps 2 to 5, pre-funded league wall
 
 "Coinbase just put Apple, Nvidia and eleven other stocks on Base as real tokens. Fifty protocols let you trade them. Nobody has given people a reason to come back every week.
 
-Sunday League is fantasy football for stocks, except the picks are real. You and your friends each fund a small league wallet. On Sunday night, while Wall Street is closed and Base is open, you draft three stocks by swiping. Those swipes are real swaps on Base, into your own wallet. All week a leaderboard ranks you by return. Friday at the close, a contract reads Chainlink, pays the pot to the winner, and the next draft opens.
+Gameweek is fantasy football for stocks, except the picks are real. You and your friends each fund a small league wallet. On Sunday night, while Wall Street is closed and Base is open, you draft three stocks by swiping. Those swipes are real swaps on Base, into your own wallet. All week a leaderboard ranks you by return. Friday at the close, a contract reads Chainlink, splits the pot across the top three, and the next gameweek opens.
 
 There is a bot in every league, an agent with its own wallet that drafts on Sunday night. Beat it.
 
 Under the hood every league wallet is a Base Account Sub Account funded by a Spend Permission, so there is one approval and then no popups, and the weekly cap is the responsible-gaming limit. Every swap carries our Builder Code and a 0x fee that funds the pots. Spot only, no leverage, nobody's principal is pooled.
 
-We built the loop that makes people trade tokenized stocks every week. Sunday League."
+We built the loop that makes people trade tokenized stocks every week. Gameweek."
 
 ## Things that burned us
 
@@ -359,7 +359,7 @@ We built the loop that makes people trade tokenized stocks every week. Sunday Le
 - 0x: never approve the Settler contract, only the spender from `issues.allowance.spender`. `swapFeeToken` must be sellToken or buyToken. Max 1000 bps.
 - Sub Account owner key lives in the user's browser storage. Trades are signed in the user's session, not by a server. Clearing site data loses the key; the universal account still owns the funds.
 - Auto Spend Permissions prompt once on the first transaction that needs USDC from the universal account, then reuse the granted allowance. Do not describe the flow as "zero prompts", it is "one prompt, then none".
-- Paymaster sponsorship needs the contract allowlist set in the CDP portal: SundayLeague, USDC, the 0x AllowanceHolder.
+- Paymaster sponsorship needs the contract allowlist set in the CDP portal: Gameweek, USDC, the 0x AllowanceHolder.
 - `forge script` simulates locally before it broadcasts, so a script that calls `setToken` (which reads `decimals()` from a B20 address) dies with `EvmError: OpcodeNotFound` even with --broadcast. Deploy and registration are therefore two steps: `forge script Deploy` for the contract, then `./script/register-tokens.sh` which uses `cast send` and goes straight to the node.
 - forge-std JSON paths support `.listings[0].ticker` but not `.listings.length` or a `[*]` projection. config/tokens.json carries an explicit `count` field for that reason.
 - B20 tokens are node precompiles, not deployed contracts. `cast code` on a B20 address returns a single placeholder byte. A live RPC executes them natively, but a Foundry fork has nothing to run, so every B20 call on a fork burns the gas limit and reverts. Fork tests must `vm.etch` an 8-decimal ERC20 at the B20 address; Chainlink feeds are ordinary contracts and work on a fork as-is. Anvil cannot simulate B20 at all. Verified and pinned by test_b20TokensHaveNoBytecode.

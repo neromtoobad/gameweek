@@ -1,13 +1,14 @@
-# Sunday League
+# Gameweek
 
 A weekly fantasy league where the picks are real Coinbase Tokenized Stocks on Base.
+
+A gameweek runs from one Friday US close to the next. Draft night is the Sunday in between, when
+Wall Street is shut and Base is not.
 
 Fund a small league wallet, draft three stocks by swiping, and a live leaderboard ranks you against
 your friends all week. Every swipe is a real swap into your own wallet. On Friday at the US close a
 contract reads Chainlink, ranks the league, and pays a USDC pot to the top three. Then the next
 draft opens.
-
-Draft night is Sunday, when Wall Street is shut and Base is not.
 
 Status: contract complete and tested. Application in progress.
 
@@ -15,13 +16,13 @@ Status: contract complete and tested. Application in progress.
 
 | Path | What |
 |---|---|
-| `contracts/` | Foundry project. `SundayLeague.sol`, unit tests, Base mainnet fork tests, deploy scripts |
+| `contracts/` | Foundry project. `Gameweek.sol`, unit tests, Base mainnet fork tests, deploy scripts |
 | `contracts/config/tokens.json` | The 13 tokenized stocks with their Chainlink feeds, verified onchain |
 | `app/` | Next.js web app (not started) |
 
 ## Contract
 
-`SundayLeague.sol` never custodies a player's stocks. It records a start-of-week net asset value per
+`Gameweek.sol` never custodies a player's stocks. It records a start-of-week net asset value per
 player, ranks players from Chainlink prices at the end of the week, and pays a USDC pot 60/30/10.
 
 Scoring, in USD with USDC's 6 decimals:

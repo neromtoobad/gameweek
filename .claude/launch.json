@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "sunday-league",
+      "name": "gameweek",
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "dev"],
       "cwd": "app",

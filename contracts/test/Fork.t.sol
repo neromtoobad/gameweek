@@ -3,7 +3,7 @@ pragma solidity ^0.8.28;
 
 import {Test} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SundayLeague} from "../src/SundayLeague.sol";
+import {Gameweek} from "../src/Gameweek.sol";
 import {IAggregatorV3} from "../src/interfaces/IAggregatorV3.sol";
 import {MockToken} from "./mocks/Mocks.sol";
 
@@ -34,7 +34,7 @@ contract ForkTest is Test {
     }
 
     Listing[13] listings;
-    SundayLeague league;
+    Gameweek gameweek;
     address owner = makeAddr("owner");
     address player = makeAddr("player");
 
@@ -68,7 +68,7 @@ contract ForkTest is Test {
         listings[12] =
             Listing("TSLAc", 0xb2000000000000000000001e800a7f5189430cD0, 0xFaf869185383a24F8cb00e27BdA6b63B9905DCb4);
 
-        league = new SundayLeague(USDC, owner);
+        gameweek = new Gameweek(USDC, owner);
     }
 
     modifier onlyFork() {
@@ -147,12 +147,12 @@ contract ForkTest is Test {
         for (uint256 i; i < listings.length; ++i) {
             _etchToken(listings[i].token);
             vm.prank(owner);
-            league.setToken(listings[i].token, listings[i].feed);
-            (, uint256 scale,) = league.tokenInfo(listings[i].token);
+            gameweek.setToken(listings[i].token, listings[i].feed);
+            (, uint256 scale,) = gameweek.tokenInfo(listings[i].token);
             assertEq(scale, 1e10, "token 8 decimals + feed 8 decimals - USDC 6 decimals");
         }
 
-        assertEq(league.tokenCount(), listings.length);
+        assertEq(gameweek.tokenCount(), listings.length);
     }
 
     /// @notice A wallet holding one share of each stock is worth the sum of the live feed prices.
@@ -167,7 +167,7 @@ contract ForkTest is Test {
             t.mint(player, 1e8); // exactly one share
 
             vm.prank(owner);
-            league.setToken(listings[i].token, listings[i].feed);
+            gameweek.setToken(listings[i].token, listings[i].feed);
 
             (, int256 answer,,,) = IAggregatorV3(listings[i].feed).latestRoundData();
             expected += uint256(answer) / 100; // an e8 price is an e6 USD amount divided by 100
@@ -175,7 +175,7 @@ contract ForkTest is Test {
         deal(USDC, player, 25e6, true);
         expected += 25e6;
 
-        uint256 nav = league.navOf(player);
+        uint256 nav = gameweek.navOf(player);
         emit log_named_uint("nav usd6", nav);
         emit log_named_uint("expected usd6", expected);
         assertEq(nav, expected, "NAV must equal cash plus the sum of the 13 live feed prices");
@@ -192,8 +192,8 @@ contract ForkTest is Test {
         MockToken nvdaToken = _etchToken(nvda);
 
         vm.startPrank(owner);
-        league.setToken(aapl, listings[0].feed); // etched first, see _etchToken
-        league.setToken(nvda, listings[9].feed);
+        gameweek.setToken(aapl, listings[0].feed); // etched first, see _etchToken
+        gameweek.setToken(nvda, listings[9].feed);
         vm.stopPrank();
 
         address p1 = makeAddr("p1");
@@ -203,21 +203,21 @@ contract ForkTest is Test {
         // hold the Friday close and are far older than a real league's two hour tolerance.
         uint64 start = uint64(block.timestamp + 1 hours);
         uint64 end = uint64(block.timestamp + 7 days);
-        uint256 id = league.createLeague("Fork League", start, end, 0, 30 days, 10);
+        uint256 id = gameweek.createLeague("Fork League", start, end, 0, 30 days, 10);
 
         vm.prank(p1);
-        league.join(id);
+        gameweek.join(id);
         vm.prank(p2);
-        league.join(id);
+        gameweek.join(id);
 
         aaplToken.mint(p1, 1e8); // p1 holds one Apple share
         nvdaToken.mint(p2, 2e8); // p2 holds two Nvidia shares
 
         vm.warp(start);
-        league.lock(id);
+        gameweek.lock(id);
 
-        uint256 nav1 = league.navStart(id, p1);
-        uint256 nav2 = league.navStart(id, p2);
+        uint256 nav1 = gameweek.navStart(id, p1);
+        uint256 nav2 = gameweek.navStart(id, p2);
         emit log_named_uint("p1 start nav, 1 AAPLc (usd6)", nav1);
         emit log_named_uint("p2 start nav, 2 NVDAc (usd6)", nav2);
 
@@ -227,19 +227,19 @@ contract ForkTest is Test {
         assertEq(nav2, (2 * uint256(nvdaPrice)) / 100, "two Nvidia shares are priced by their live feed");
 
         deal(USDC, address(this), 10e6, true);
-        IERC20(USDC).approve(address(league), 10e6);
-        league.sponsor(id, 10e6);
+        IERC20(USDC).approve(address(gameweek), 10e6);
+        gameweek.sponsor(id, 10e6);
 
         // p1's holding doubles during the week, p2's is untouched.
         vm.warp(end);
         aaplToken.mint(p1, 1e8);
 
-        league.settle(id);
+        gameweek.settle(id);
 
-        assertTrue(league.getLeague(id).settled);
-        assertEq(IERC20(USDC).balanceOf(address(league)), 0, "pot fully paid out");
+        assertTrue(gameweek.getLeague(id).settled);
+        assertEq(IERC20(USDC).balanceOf(address(gameweek)), 0, "pot fully paid out");
 
-        address[3] memory podium = league.getPodium(id);
+        address[3] memory podium = gameweek.getPodium(id);
         assertEq(podium[0], p1, "the doubled portfolio wins");
         assertEq(podium[1], p2);
         assertEq(IERC20(USDC).balanceOf(p1), 7e6, "60 percent plus the unused third-place share");

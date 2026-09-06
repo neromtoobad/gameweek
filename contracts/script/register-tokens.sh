@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Registers every live Coinbase Tokenized Stock on a deployed SundayLeague.
+# Registers every live Coinbase Tokenized Stock on a deployed Gameweek.
 #
 #   ./script/register-tokens.sh 0xLeagueAddress [--all]
 #

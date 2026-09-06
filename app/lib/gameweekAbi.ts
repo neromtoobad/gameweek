@@ -1,10 +1,10 @@
 /**
  * GENERATED FILE, DO NOT EDIT.
- * Source: contracts/out/SundayLeague.sol/SundayLeague.json
+ * Source: contracts/out/Gameweek.sol/Gameweek.json
  * Regenerate: cd contracts && forge build && cd ../app && bun run gen:abi
  */
 
-export const sundayLeagueAbi = [
+export const gameweekAbi = [
   {
     "type": "constructor",
     "inputs": [
@@ -170,7 +170,7 @@ export const sundayLeagueAbi = [
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct SundayLeague.League",
+        "internalType": "struct Gameweek.League",
         "components": [
           {
             "name": "name",

@@ -113,7 +113,7 @@ What makes trading habit-forming (Robinhood, Polymarket, fantasy sports, pump.fu
 - Variable rewards on top of the expected one.
 - Zero friction on the action itself. Every wallet popup kills the loop.
 
-### F. Sunday League (working name) — fantasy league where the picks are real stocks
+### F. Gameweek (working name) — fantasy league where the picks are real stocks
 Weekly leagues of 3 to 20 friends inside Base App. Each member funds a small league wallet (say $20), drafts 3 of the 13 tickers by swiping, and the app buys them for real. Live leaderboard all week by wallet value. Sunday night is draft night because TradFi is closed and onchain is the only place the picks can be placed; Monday's open settles who read the weekend right. Winner takes the prize pot. Re-draft every week, which forces swaps, which is the volume.
 
 Loop: push "draft closes in 2h" -> swipe picks (no signature) -> leaderboard moves all week -> prize + streak + rank -> next week's draft.

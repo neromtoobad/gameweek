@@ -4,9 +4,9 @@ pragma solidity ^0.8.28;
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 import {stdJson} from "forge-std/StdJson.sol";
-import {SundayLeague} from "../src/SundayLeague.sol";
+import {Gameweek} from "../src/Gameweek.sol";
 
-/// @notice Deploys SundayLeague to Base mainnet.
+/// @notice Deploys Gameweek to Base mainnet.
 ///
 ///   forge script script/Deploy.s.sol:Deploy \
 ///     --rpc-url $BASE_RPC_URL --account deployer --broadcast --verify
@@ -22,15 +22,15 @@ import {SundayLeague} from "../src/SundayLeague.sol";
 contract Deploy is Script {
     using stdJson for string;
 
-    function run() external returns (SundayLeague league) {
+    function run() external returns (Gameweek league) {
         string memory json = vm.readFile("config/tokens.json");
         address usdc = json.readAddress(".usdc");
 
         vm.startBroadcast();
-        league = new SundayLeague(usdc, msg.sender);
+        league = new Gameweek(usdc, msg.sender);
         vm.stopBroadcast();
 
-        console.log("SundayLeague deployed at", address(league));
+        console.log("Gameweek deployed at", address(league));
         console.log("owner", msg.sender);
         console.log("usdc", usdc);
         console.log("Next: run ./script/register-tokens.sh with the address above");
@@ -47,7 +47,7 @@ contract Deploy is Script {
 /// @dev Safe to simulate: it touches no B20 address.
 contract CreateLeague is Script {
     function run() external returns (uint256 id) {
-        SundayLeague league = SundayLeague(vm.envAddress("LEAGUE"));
+        Gameweek league = Gameweek(vm.envAddress("LEAGUE"));
 
         string memory name = vm.envString("NAME");
         uint64 start = uint64(vm.envUint("START"));

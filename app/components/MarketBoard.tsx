@@ -9,7 +9,7 @@ import { ago, sharePrice } from "@/lib/format";
  * The 13 listed stocks with live Chainlink prices.
  *
  * The feeds run 24/5. When US markets are shut they hold the last close, which is exactly the
- * window Sunday League is built around, so the board says so rather than hiding it.
+ * window Gameweek is built around, so the board says so rather than hiding it.
  */
 export function MarketBoard() {
   const quotes = useQuery({

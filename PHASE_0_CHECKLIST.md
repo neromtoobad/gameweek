@@ -1,4 +1,4 @@
-# PHASE_0_CHECKLIST — Sunday League
+# PHASE_0_CHECKLIST — Gameweek
 
 Everything to have in place before opening Claude Code for Phase 1. Every box should be checkable with certainty. Delete this file before submission.
 
@@ -12,9 +12,9 @@ Everything to have in place before opening Claude Code for Phase 1. Every box sh
 ## 1. Accounts and API keys
 
 Coinbase Developer Platform (portal.cdp.coinbase.com)
-- [ ] Create a project named `sunday-league`.
+- [ ] Create a project named `gameweek`.
 - [ ] Onchain Tools -> Paymaster -> enable Base Mainnet. Copy the RPC URL into `NEXT_PUBLIC_PAYMASTER_URL`.
-- [ ] Set Paymaster per-user limit (suggest $1 per user per day) and a global cap (suggest $20). Contract allowlist gets filled in Phase 1 after deploy: SundayLeague, USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`, and the 0x AllowanceHolder address returned in `issues.allowance.spender`.
+- [ ] Set Paymaster per-user limit (suggest $1 per user per day) and a global cap (suggest $20). Contract allowlist gets filled in Phase 1 after deploy: Gameweek, USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`, and the 0x AllowanceHolder address returned in `issues.allowance.spender`.
 - [ ] Node -> Base Mainnet RPC URL. Copy into `BASE_RPC_URL`. Do not rely on the public `https://mainnet.base.org` endpoint for fork tests, it rate-limits.
 - [ ] Optional: apply for Base gas credits from the Paymaster page.
 
@@ -40,7 +40,7 @@ Vercel
 - [ ] Account exists. `bun add -g vercel && vercel login` succeeds.
 
 GitHub
-- [ ] Create an empty public repo `sunday-league`. Do not push anything until section 2's git identity step is done.
+- [ ] Create an empty public repo `gameweek`. Do not push anything until section 2's git identity step is done.
 
 ## 2. Wallets and credentials
 
@@ -170,7 +170,7 @@ Fill the right column. Defaults are recommendations.
 - [ ] Trust strip: "Spot only. Your wallet. Your stocks. Weekly cap set by you."
 - [ ] Jurisdiction notice: "Coinbase Tokenized Stocks are available only to eligible persons outside the United States. By drafting you confirm you are eligible. Information shown is not investment advice."
 - [ ] Onboarding, 3 screens, one sentence each: what a league is, what a league wallet is, when it locks and settles.
-- [ ] Share card copy: "{name} is #{rank} in {league} · {return}% · picks: {A} {B} {C} · sundayleague.xyz/join/{id}".
+- [ ] Share card copy: "{name} is #{rank} in {league} · {return}% · picks: {A} {B} {C} · gameweek.xyz/join/{id}".
 - [ ] Demo league names: "Lagos Bulls" (friends), "Sunday Public" (open).
 - [ ] README skeleton headings: pitch, how a week works, architecture diagram, what is onchain, live numbers, tx links, AI tools used, run it yourself.
 - [ ] Submission tweet, under 280 characters, with the spectator link.
