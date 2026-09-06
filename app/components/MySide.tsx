@@ -42,7 +42,7 @@ export function MySide({
   });
 
   if (side.isPending) {
-    return <div className="h-[360px] animate-pulse rounded-3xl border border-line-800 bg-pitch-900/60" />;
+    return <div className="h-[360px] animate-pulse rounded-3xl border border-line-800 bg-deep-900/60" />;
   }
 
   const holdings = side.data?.holdings ?? [];
@@ -64,7 +64,7 @@ export function MySide({
         ) : (
           <Link
             href="/draft"
-            className="mt-3 inline-block rounded-xl bg-turf-500 px-4 py-2 text-sm font-semibold text-pitch-950 transition hover:bg-turf-400"
+            className="mt-3 inline-block rounded-xl bg-base-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-base-400"
           >
             Pick your side
           </Link>
@@ -99,7 +99,7 @@ export function MySide({
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-baseline justify-between">
-        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-chalk-300">
+        <h2 className="flex items-center gap-2 text-base font-bold tracking-tight">
           {heading}
           {onBack && (
             <button
@@ -131,13 +131,13 @@ export function MySide({
 
       <Pitch slots={slots} />
 
-      <div className="flex items-center justify-between rounded-xl border border-line-800 bg-pitch-900/60 px-4 py-2.5 text-sm">
+      <div className="flex items-center justify-between rounded-xl border border-line-800 bg-deep-900/60 px-4 py-2.5 text-sm">
         <span className="text-chalk-500">Squad value</span>
         <span className="tnum font-semibold">{usd(side.data!.nav)}</span>
       </div>
 
       {bench.length > 0 && (
-        <div className="rounded-xl border border-line-800 bg-pitch-900/60 px-4 py-2.5">
+        <div className="rounded-xl border border-line-800 bg-deep-900/60 px-4 py-2.5">
           <p className="text-xs uppercase tracking-wide text-chalk-500">Also held</p>
           <ul className="mt-1 space-y-1">
             {bench.map((h) => (

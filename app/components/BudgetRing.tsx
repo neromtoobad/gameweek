@@ -24,7 +24,7 @@ export function BudgetRing({ remaining, budget }: { remaining: bigint; budget: b
           cy="32"
           r={radius}
           fill="none"
-          stroke="var(--color-turf-500)"
+          stroke="var(--color-base-500)"
           strokeWidth="6"
           strokeLinecap="round"
           strokeDasharray={`${dash} ${circumference}`}

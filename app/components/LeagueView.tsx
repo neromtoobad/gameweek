@@ -49,11 +49,11 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
   // Wait for the clock as well as the data. Which phase a league is in depends on the current
   // time, and reading it during render would be impure.
   if (league.isPending || now === null) {
-    return <div className="h-64 animate-pulse rounded-2xl border border-line-800 bg-pitch-900/60" />;
+    return <div className="h-64 animate-pulse rounded-2xl border border-line-800 bg-deep-900/60" />;
   }
   if (!league.data) {
     return (
-      <p className="rounded-2xl border border-line-800 bg-pitch-900/60 px-4 py-8 text-center text-sm text-chalk-500">
+      <p className="rounded-2xl border border-line-800 bg-deep-900/60 px-4 py-8 text-center text-sm text-chalk-500">
         No league with that number.
       </p>
     );
@@ -90,13 +90,13 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
 
   return (
     <div className="flex flex-col gap-4">
-      <section className="rounded-2xl border border-line-800 bg-gradient-to-b from-pitch-800 to-pitch-900 p-5">
+      <section className="hero-wash relative overflow-hidden rounded-2xl border border-line-800 p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs uppercase tracking-wide text-turf-400">
+            <p className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
               Matchday {matchdayNumber(now)}
             </p>
-            <h1 className="mt-0.5 text-2xl font-semibold leading-tight">{l.name}</h1>
+            <h1 className="mt-1 text-[26px] font-bold leading-[1.15] tracking-tight">{l.name}</h1>
           </div>
           <span className="shrink-0 rounded-lg border border-line-800 px-2 py-1 text-xs text-chalk-300">
             {copy.label}
@@ -157,7 +157,10 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
       )}
 
       <div>
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-chalk-300">Table</h2>
+        <div className="mb-2">
+          <h2 className="text-base font-bold tracking-tight">Table</h2>
+          <p className="text-xs text-chalk-500">Ranked by points, the same number the contract settles on.</p>
+        </div>
         <Leaderboard
           standings={rows}
           you={wallet}
@@ -168,7 +171,7 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
       </div>
 
       {l.settled && podium.data && (
-        <p className="rounded-2xl border border-turf-500/40 bg-turf-500/10 px-4 py-3 text-center text-sm">
+        <p className="rounded-2xl border border-base-500/40 bg-base-500/10 px-4 py-3 text-center text-sm">
           Settled. The pot went to the top three.
         </p>
       )}
@@ -180,7 +183,7 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
               type="button"
               onClick={() => run("join")}
               disabled={busy !== null}
-              className="rounded-xl bg-turf-500 px-4 py-3 font-semibold text-pitch-950 transition hover:bg-turf-400 disabled:opacity-60"
+              className="rounded-xl bg-base-500 px-4 py-3 font-bold text-white shadow-lg shadow-base-500/25 transition hover:bg-base-400 disabled:opacity-60"
             >
               {busy === "join" ? "Joining…" : "Join this league"}
             </button>
@@ -189,7 +192,7 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
           {phase === "drafting" && joined && (
             <Link
               href="/draft"
-              className="rounded-xl bg-turf-500 px-4 py-3 text-center font-semibold text-pitch-950 transition hover:bg-turf-400"
+              className="rounded-xl bg-base-500 px-4 py-3 text-center font-bold text-white transition hover:bg-base-400"
             >
               Pick your side
             </Link>
@@ -200,7 +203,7 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
               type="button"
               onClick={() => run("lock")}
               disabled={busy !== null}
-              className="rounded-xl border border-line-800 px-4 py-3 font-semibold text-chalk-100 transition hover:border-turf-500 disabled:opacity-60"
+              className="rounded-xl border border-line-800 px-4 py-3 font-semibold text-chalk-100 transition hover:border-base-500 disabled:opacity-60"
             >
               {busy === "lock" ? "Locking…" : "Lock the league"}
             </button>
@@ -211,7 +214,7 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
               type="button"
               onClick={() => run("settle")}
               disabled={busy !== null}
-              className="rounded-xl bg-turf-500 px-4 py-3 font-semibold text-pitch-950 transition hover:bg-turf-400 disabled:opacity-60"
+              className="rounded-xl bg-base-500 px-4 py-3 font-bold text-white shadow-lg shadow-base-500/25 transition hover:bg-base-400 disabled:opacity-60"
             >
               {busy === "settle" ? "Settling…" : "Settle and pay the pot"}
             </button>
@@ -239,7 +242,7 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
       {error && <p className="text-center text-xs text-down">{error}</p>}
 
       {botIsPlaying && (
-        <p className="rounded-xl border border-line-800 bg-pitch-900/60 px-4 py-2.5 text-[11px] leading-relaxed text-chalk-500">
+        <p className="rounded-xl border border-line-800 bg-deep-900/60 px-4 py-2.5 text-[11px] leading-relaxed text-chalk-500">
           <span className="font-semibold text-chalk-300">{STRATEGY_NAME}</span> is in this league. It
           is an agent with its own wallet and its own money. {STRATEGY_LINE} Beat it.
         </p>

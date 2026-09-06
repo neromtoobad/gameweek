@@ -9,6 +9,9 @@ import urllib.request
 
 SLUGS = {
     "AAPLc": ("apple", "Apple"),
+    "COINc": ("coinbase", "Coinbase"),
+    "CRCLc": ("circle", "Circle"),
+    "INTCc": ("intel", "Intel"),
     "AMZNc": ("amazon", "Amazon"),
     "GOOGLc": ("google", "Alphabet"),
     "METAc": ("meta", "Meta"),

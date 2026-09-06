@@ -85,12 +85,12 @@ export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, on
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
     >
-      <div className="relative overflow-hidden rounded-3xl border border-line-800 bg-gradient-to-b from-pitch-800 to-pitch-900 p-5 shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl border border-line-800 bg-gradient-to-b from-deep-800 to-deep-900 p-5 shadow-2xl">
         {intent && (
           <span
             className={`absolute right-4 top-4 rounded-lg border px-2 py-1 text-xs font-bold uppercase tracking-wide ${
               intent === "draft"
-                ? "border-turf-400 text-turf-400"
+                ? "border-cyan-400 text-cyan-400"
                 : "border-chalk-500 text-chalk-500"
             }`}
           >
@@ -123,7 +123,7 @@ export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, on
           </p>
         )}
 
-        <div className="mt-5 rounded-xl border border-line-900 bg-pitch-950/50 px-4 py-3">
+        <div className="mt-5 rounded-xl border border-line-900 bg-deep-950/50 px-4 py-3">
           <div className="flex items-baseline justify-between">
             <span className="text-xs uppercase tracking-wide text-chalk-500">Stake</span>
             <span className="tnum font-semibold">{usd(stake)}</span>

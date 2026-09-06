@@ -119,12 +119,12 @@ export function SquadBuilder() {
   }));
 
   if (market.isPending) {
-    return <div className="h-[520px] animate-pulse rounded-3xl border border-line-800 bg-pitch-900/60" />;
+    return <div className="h-[520px] animate-pulse rounded-3xl border border-line-800 bg-deep-900/60" />;
   }
 
   if (market.isError || deck.length === 0) {
     return (
-      <div className="rounded-3xl border border-line-800 bg-pitch-900/60 p-6 text-center">
+      <div className="rounded-3xl border border-line-800 bg-deep-900/60 p-6 text-center">
         <p className="text-sm text-chalk-300">No draftable stocks right now.</p>
         <p className="mt-1 text-xs text-chalk-500">
           A stock is only draftable once it has an onchain pool to buy it from.
@@ -188,7 +188,7 @@ export function SquadBuilder() {
             <button
               type="button"
               onClick={() => pick(card)}
-              className="flex-1 rounded-xl bg-turf-500 px-4 py-3 font-semibold text-pitch-950 transition hover:bg-turf-400"
+              className="flex-1 rounded-xl bg-base-500 px-4 py-3 font-bold text-white shadow-lg shadow-base-500/25 transition hover:bg-base-400"
             >
               Pick {card.listing.name}
             </button>
@@ -202,8 +202,8 @@ export function SquadBuilder() {
       )}
 
       {complete && (
-        <div className="rounded-2xl border border-line-800 bg-pitch-900/60 p-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-chalk-300">Your side</h3>
+        <div className="rounded-2xl border border-line-800 bg-deep-900/60 p-4">
+          <h3 className="text-base font-bold tracking-tight">Your side</h3>
 
           <ul className="mt-2 divide-y divide-line-900">
             {filled.map((c, i) => (
@@ -211,7 +211,7 @@ export function SquadBuilder() {
                 <span className="flex items-center gap-2">
                   <span className="font-mono text-sm">{c.listing.ticker}</span>
                   {captain === i && (
-                    <span className="rounded bg-chalk-100 px-1 text-[9px] font-bold text-pitch-950">
+                    <span className="rounded bg-chalk-100 px-1 text-[9px] font-bold text-deep-950">
                       C
                     </span>
                   )}
@@ -237,7 +237,7 @@ export function SquadBuilder() {
               type="button"
               onClick={submit}
               disabled={submission.state === "sending"}
-              className="mt-3 w-full rounded-xl bg-turf-500 px-4 py-3 font-semibold text-pitch-950 transition hover:bg-turf-400 disabled:opacity-60"
+              className="mt-3 w-full rounded-xl bg-base-500 px-4 py-3 font-bold text-white shadow-lg shadow-base-500/25 transition hover:bg-base-400 disabled:opacity-60"
             >
               {submission.state === "sending" ? "Confirming…" : `Buy the squad · ${usd(totalStake)}`}
             </button>

@@ -49,7 +49,7 @@ export function ShareBar({
         href={tweetUrl(text, link)}
         target="_blank"
         rel="noreferrer"
-        className="flex-1 rounded-xl bg-chalk-100 px-4 py-2.5 text-center text-sm font-semibold text-pitch-950 transition hover:bg-white"
+        className="flex-1 rounded-xl bg-chalk-100 px-4 py-2.5 text-center text-sm font-semibold text-deep-950 transition hover:bg-white"
       >
         Post on X
       </a>

@@ -18,6 +18,9 @@ export type PitchSlot = {
 /**
  * The team sheet.
  *
+ * A blue pitch rather than a green one. It is the same shape any fantasy football game draws, and
+ * the colour is what makes a screenshot of this one recognisable as this one.
+ *
  * Five shirts in a 1-2-2, laid out the way a fantasy football side is: keeper at the back, forwards
  * at the top. Seeing your picks as a formation rather than a list is most of what makes the game
  * feel like a game.
@@ -49,11 +52,11 @@ export function Pitch({
         className="absolute inset-0"
         style={{
           background:
-            "repeating-linear-gradient(180deg, #0d2b18 0px, #0d2b18 34px, #0f3320 34px, #0f3320 68px)",
+            "repeating-linear-gradient(180deg, var(--color-turf-900) 0px, var(--color-turf-900) 34px, var(--color-turf-800) 34px, var(--color-turf-800) 68px)",
         }}
       />
       <svg aria-hidden className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 140">
-        <g stroke="rgba(255,255,255,0.13)" strokeWidth="0.5" fill="none">
+        <g stroke="rgba(255,255,255,0.18)" strokeWidth="0.5" fill="none">
           <rect x="3" y="3" width="94" height="134" />
           <line x1="3" y1="70" x2="97" y2="70" />
           <circle cx="50" cy="70" r="13" />
@@ -80,7 +83,7 @@ export function Pitch({
                   disabled={!onSlotClick}
                   className={`flex w-20 flex-col items-center gap-1 rounded-xl p-1 transition ${
                     onSlotClick ? "hover:bg-white/5" : "cursor-default"
-                  } ${waiting ? "ring-1 ring-turf-400" : ""}`}
+                  } ${waiting ? "ring-1 ring-cyan-400" : ""}`}
                 >
                   {empty ? (
                     <span
@@ -93,7 +96,7 @@ export function Pitch({
                     <span className="relative">
                       <Jersey ticker={slot.ticker!} size={52} />
                       {slot.isCaptain && (
-                        <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-chalk-100 text-[9px] font-bold text-pitch-950">
+                        <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-chalk-100 text-[9px] font-bold text-deep-950">
                           C
                         </span>
                       )}

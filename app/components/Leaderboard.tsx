@@ -37,7 +37,7 @@ export function Leaderboard({
   }
 
   return (
-    <ul className="divide-y divide-line-900 overflow-hidden rounded-2xl border border-line-800 bg-pitch-900/60">
+    <ul className="divide-y divide-line-900 overflow-hidden rounded-2xl border border-line-800 bg-deep-900/60">
       {standings.map((s) => {
         const isYou = you && s.member.toLowerCase() === you.toLowerCase();
         const isSelected = selected && s.member.toLowerCase() === selected.toLowerCase();
@@ -49,10 +49,16 @@ export function Leaderboard({
           <li
             key={s.member}
             className={`flex items-center gap-3 px-4 py-3 ${
-              isYou ? "bg-turf-500/10" : ""
-            } ${isSelected ? "bg-pitch-800" : ""}`}
+              isYou ? "bg-base-500/10" : ""
+            } ${isSelected ? "bg-deep-800" : ""}`}
           >
-            <span className="w-6 shrink-0 text-center text-sm text-chalk-500">
+            <span
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
+                showPayout && s.rank <= 3
+                  ? "bg-base-500 text-white"
+                  : "bg-deep-800 text-chalk-300"
+              }`}
+            >
               {showPayout && s.rank <= 3 ? MEDALS[s.rank - 1] : s.rank}
             </span>
 
@@ -75,7 +81,7 @@ export function Leaderboard({
                   {shortAddress(s.member)}
                 </a>
               )}
-              {isYou && <span className="ml-2 text-xs text-turf-400">you</span>}
+              {isYou && <span className="ml-2 text-xs text-cyan-400">you</span>}
               {isBot && (
                 <span className="ml-2 rounded bg-chalk-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-chalk-300">
                   bot

@@ -18,12 +18,12 @@ export function AccountBar() {
   });
 
   if (status === "loading") {
-    return <div className="h-[92px] animate-pulse rounded-2xl border border-line-800 bg-pitch-900/60" />;
+    return <div className="h-[92px] animate-pulse rounded-2xl border border-line-800 bg-deep-900/60" />;
   }
 
   if (status !== "connected" || !accounts) {
     return (
-      <div className="rounded-2xl border border-line-800 bg-pitch-900/60 p-4">
+      <div className="rounded-2xl border border-line-800 bg-deep-900/60 p-4">
         <p className="text-sm text-chalk-300">
           Connect to get a league wallet. It is yours, held by a passkey, and the stocks you draft
           land in it.
@@ -32,7 +32,7 @@ export function AccountBar() {
           type="button"
           onClick={connect}
           disabled={status === "connecting"}
-          className="mt-3 w-full rounded-xl bg-turf-500 px-4 py-3 font-semibold text-pitch-950 transition hover:bg-turf-400 disabled:opacity-60"
+          className="mt-3 w-full rounded-xl bg-base-500 px-4 py-3 font-bold text-white shadow-lg shadow-base-500/25 transition hover:bg-base-400 disabled:opacity-60"
         >
           {status === "connecting" ? "Opening Base Account…" : "Connect"}
         </button>
@@ -46,7 +46,7 @@ export function AccountBar() {
   const stocks = portfolio.data?.stocks;
 
   return (
-    <div className="rounded-2xl border border-line-800 bg-pitch-900/60 p-4">
+    <div className="rounded-2xl border border-line-800 bg-deep-900/60 p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-wide text-chalk-500">League wallet</p>

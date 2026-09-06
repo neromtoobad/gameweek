@@ -24,10 +24,13 @@ export function MarketBoard() {
 
   return (
     <section>
-      <div className="mb-2 flex items-baseline justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-chalk-300">The board</h2>
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <div>
+          <h2 className="text-base font-bold tracking-tight">The board</h2>
+          <p className="text-xs text-chalk-500">Every stock you can field, priced live.</p>
+        </div>
         {state && (
-          <span className="text-xs text-chalk-500">
+          <span className="shrink-0 text-right text-xs text-chalk-500">
             {state.open ? (
               <span className="text-up">Market open</span>
             ) : (
@@ -37,7 +40,7 @@ export function MarketBoard() {
         )}
       </div>
 
-      <ul className="divide-y divide-line-900 overflow-hidden rounded-2xl border border-line-800 bg-pitch-900/60">
+      <ul className="divide-y divide-line-900 overflow-hidden rounded-2xl border border-line-800 bg-deep-900/60">
         {quotes.isPending &&
           LISTINGS.map((l) => (
             <li key={l.ticker} className="flex h-[58px] items-center px-4">

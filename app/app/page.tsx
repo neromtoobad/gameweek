@@ -8,16 +8,16 @@ import { LeagueList } from "@/components/LeagueList";
 export default function Home() {
   return (
     <main className="flex flex-1 flex-col gap-5 px-4 pb-16 pt-6">
-      <header className="flex items-center gap-2">
-        <Logo size={22} />
-        <span className="font-semibold tracking-tight">Gameweek</span>
+      <header className="flex items-center gap-2.5">
+        <Logo size={26} />
+        <span className="text-lg font-bold tracking-tight">Gameweek</span>
       </header>
 
       <NextDraft />
 
       <Link
         href="/draft"
-        className="rounded-xl bg-turf-500 px-4 py-3 text-center font-semibold text-pitch-950 transition hover:bg-turf-400"
+        className="rounded-xl bg-base-500 px-4 py-3.5 text-center font-bold text-white shadow-lg shadow-base-500/25 transition hover:bg-base-400"
       >
         Pick your side
       </Link>
