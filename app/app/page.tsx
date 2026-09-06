@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 import { AccountBar } from "@/components/AccountBar";
 import { MarketBoard } from "@/components/MarketBoard";
 import { NextDraft } from "@/components/NextDraft";
@@ -8,9 +9,7 @@ export default function Home() {
   return (
     <main className="flex flex-1 flex-col gap-5 px-4 pb-16 pt-6">
       <header className="flex items-center gap-2">
-        <span aria-hidden className="text-xl">
-          🏆
-        </span>
+        <Logo size={22} />
         <span className="font-semibold tracking-tight">Gameweek</span>
       </header>
 
