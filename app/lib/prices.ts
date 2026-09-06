@@ -42,7 +42,9 @@ export async function readQuotes(listings: Listing[] = LISTINGS): Promise<Quote[
  * closes are handled without a schedule to maintain.
  */
 export function marketState(quotes: Quote[]): { open: boolean; youngest: number } {
-  if (quotes.length === 0) return { open: false, youngest: Number.POSITIVE_INFINITY };
+  // Callers should not ask about an empty board, but be explicit rather than returning Infinity and
+  // rendering it.
+  if (quotes.length === 0) return { open: false, youngest: 0 };
   const youngest = Math.min(...quotes.map((q) => q.age));
   return { open: youngest < 3600, youngest };
 }

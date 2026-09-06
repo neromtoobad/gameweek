@@ -18,7 +18,8 @@ export function MarketBoard() {
     refetchInterval: 60_000,
   });
 
-  const state = quotes.data ? marketState(quotes.data) : null;
+  // With no quotes at all there is no market state to report, only an empty board.
+  const state = quotes.data && quotes.data.length > 0 ? marketState(quotes.data) : null;
 
   return (
     <section>
@@ -58,9 +59,9 @@ export function MarketBoard() {
           </li>
         ))}
 
-        {quotes.isError && (
+        {(quotes.isError || quotes.data?.length === 0) && (
           <li className="px-4 py-6 text-center text-sm text-chalk-500">
-            Could not reach Base right now.
+            No prices right now.
           </li>
         )}
       </ul>

@@ -264,14 +264,14 @@ Phase 3 — Trading
 - [ ] 3.7 Receipts tab: every swap for this league wallet with Basescan link and Builder Code suffix highlighted.
 
 Phase 4 — League loop
-- [ ] 4.1 Create league (name, buy-in, times) and join by invite link /join/[id].
-- [ ] 4.2 Leaderboard: live return per member from /api/nav, onchain navStart, countdown to lock/settle.
-- [ ] 4.3 lock/settle buttons (anyone can call) + scripts/settle.ts.
+- [x] 4.1 DONE (partly). Join works from the league page. Creating a league from the UI is not built; leagues are opened with the CreateLeague script, which is enough for the demo.
+- [x] 4.2 DONE. Leaderboard reads navStart onchain and live NAV per member, scores with the same capped ratio the contract settles on, and counts down to lock or settle.
+- [x] 4.3 DONE in the UI. Lock and settle buttons appear when the phase allows, from any connected wallet. A standalone settle script is still worth having for a cron.
 - [ ] 4.4 Pot display, sponsor flow from treasury, podium banner (60/30/10) after settle.
 - [ ] 4.5 Basenames on every leaderboard row, hex fallback.
 - [ ] 4.6 Pot page: list of fee transfers into the treasury and sponsor() calls into this pot.
 - [ ] 4.7 Public open league created and pinned on the home page. maxMembers 100.
-- [ ] 4.8 Spectator page: read-only league view with no wallet connect, linked from the README for judges.
+- [x] 4.8 DONE. /spectate/[id] renders the same league read-only. US judges cannot hold these tokens, so this is how they watch a real league settle.
 
 Phase 5 — Ritual (only after Phase 4 is demoable end to end)
 - [ ] 5.1 Sunday draft-night copy, countdowns, "weekend gap" badge showing DEX price vs Friday close.
@@ -404,6 +404,10 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 - `setToken` reads `decimals()` from the token, so in a fork test the etch must happen before the registration call, not after.
 - `vm.expectRevert` claims the very next call. Reading a public constant like `league.MAX_MEMBERS()` inside the argument list consumes it and the test fails with "next call did not revert". Hoist those reads into locals first.
 - No testnet has the B20 stocks. Everything is mainnet with small amounts. Deploy costs cents on Base.
+- viem's chain config carries a Multicall3 address. Point a Base-configured client at anvil and every multicall fails, because nothing is deployed there. `multicallResilient` now falls back to individual reads, so local and mainnet behave the same.
+- B20 precompiles cannot run on any local chain, so `./script/local-dev.sh` seeds anvil with mock tokens on real prices. It is the only way to build the league screens without spending mainnet money.
+- `Date.now()` during render is impure and the React lint rejects it. Anything time-dependent waits for `useNowSeconds` instead of falling back to the clock.
+- The leaderboard must apply the contract's score cap. Showing an uncapped score promises a standing settlement will not honour.
 - The public Base RPC throttles bursts, and viem reports a throttled batch as per-call failures that look exactly like reverts. A flatMap that drops failures silently blanks the whole board. lib/chain.ts `multicallResilient` retries only the failed entries; use it for every read.
 - Do not spend an RPC call on something address ordering already tells you. A pool's token0 is just the lower address, so USDC (0x83...) is always token0 against a B20 (0xb2...).
 - forge-std has no `.length` JSON path and no `[*]` projection, but `.listings[0].ticker` works.
@@ -435,5 +439,5 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 
 ## Status
 
-Phase: 3 mostly done. Contract complete (44 tests green, not yet deployed). Draft loop built and working in a browser against live Aerodrome prices. GameweekRouter written and tested but not deployed. Next action: deploy Gameweek and GameweekRouter to Base mainnet, which needs a funded deployer key from PHASE_0_CHECKLIST.md, then a $2 live swap to prove the loop end to end. No 0x key is needed any more.
+Phase: 4 mostly done. Contract complete (44 tests green, not yet deployed). Draft loop and league loop both built and verified in a browser. Leaderboard, join, lock, settle and a read-only spectator view all work against a local chain seeded by ./script/local-dev.sh. GameweekRouter written and tested but not deployed. Next action: deploy Gameweek and GameweekRouter to Base mainnet, which needs a funded deployer key from PHASE_0_CHECKLIST.md, then a $2 live swap to prove the loop end to end. No 0x key is needed any more.
 Deadline: UNKNOWN. Contract address: not deployed. Builder Code: not registered.

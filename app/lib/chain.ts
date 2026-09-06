@@ -51,6 +51,26 @@ export async function multicallResilient<T = unknown>(
     pending = stillPending;
   }
 
+  // Multicall3 may not exist on the chain at all. It is deployed on Base, but a local anvil node
+  // has nothing at that address, and the failure is indistinguishable from a throttled batch. Fall
+  // back to plain calls so local development and mainnet behave the same.
+  if (pending.length > 0) {
+    const settled = await Promise.allSettled(
+      pending.map((i) =>
+        publicClient.readContract({
+          address: contracts[i].address,
+          abi: contracts[i].abi as never,
+          functionName: contracts[i].functionName,
+          args: contracts[i].args as never,
+        }),
+      ),
+    );
+    pending.forEach((originalIndex, j) => {
+      const r = settled[j];
+      if (r.status === "fulfilled") out[originalIndex] = { status: "success", result: r.value as T };
+    });
+  }
+
   return out;
 }
 

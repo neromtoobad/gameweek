@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AccountBar } from "@/components/AccountBar";
 import { MarketBoard } from "@/components/MarketBoard";
 import { NextDraft } from "@/components/NextDraft";
-import { GAMEWEEK } from "@/lib/config";
+import { LeagueList } from "@/components/LeagueList";
 
 export default function Home() {
   return (
@@ -25,11 +25,7 @@ export default function Home() {
 
       <AccountBar />
 
-      {!GAMEWEEK && (
-        <p className="rounded-xl border border-dashed border-line-800 px-4 py-3 text-xs leading-relaxed text-chalk-500">
-          Leagues appear here once the contract is deployed. The board below is live either way.
-        </p>
-      )}
+      <LeagueList />
 
       <MarketBoard />
 
