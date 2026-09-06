@@ -3,6 +3,7 @@ import { gameweekAbi } from "./gameweekAbi";
 import { GAMEWEEK } from "./config";
 import { erc20Abi } from "./chain";
 import { LISTINGS, type Listing } from "./tokens";
+import { positionOf, type Position } from "./squad";
 
 /** Display name for a ticker, falling back to the ticker itself for anything unrecognised. */
 const nameFor = (ticker: string): string =>
@@ -35,7 +36,11 @@ export type Standing = {
   /** navNow / navStart in basis points, where 10_000 is flat. Null before the league locks. */
   scoreBps: number | null;
   rank: number;
+  /** Tickers the wallet holds, keeper first, so a row can show the side at a glance. */
+  shirts: string[];
 };
+
+const POSITION_ORDER: Record<Position, number> = { GK: 0, DEF: 1, FWD: 2 };
 
 /** Where a league is in its week. Drives what the screen offers to do next. */
 export type Phase = "drafting" | "running" | "settling" | "settled";
@@ -126,7 +131,7 @@ export async function readLeague(id: number): Promise<League | null> {
  * what a player watches all week is exactly what decides the pot. Before a league locks there is no
  * starting NAV to divide by, so members are shown with their current value and no score.
  */
-export async function readStandings(id: number): Promise<Standing[]> {
+export async function readStandings(id: number, known?: Listing[]): Promise<Standing[]> {
   const address = requireAddress();
 
   const members = (await publicClient.readContract({
@@ -138,7 +143,11 @@ export async function readStandings(id: number): Promise<Standing[]> {
 
   if (members.length === 0) return [];
 
-  const [starts, nows] = await Promise.all([
+  // The contract's own token list, so the shirts on a row are the ones it scores. A caller that
+  // has already read it passes it in rather than paying for the round trip twice.
+  const listings = known ?? (await readRegisteredListings().catch(() => LISTINGS));
+
+  const [starts, nows, balances] = await Promise.all([
     multicallResilient<bigint>(
       members.map((m) => ({
         address,
@@ -150,6 +159,11 @@ export async function readStandings(id: number): Promise<Standing[]> {
     multicallResilient<bigint>(
       members.map((m) => ({ address, abi: gameweekAbi, functionName: "navOf", args: [m] })),
     ),
+    multicallResilient<bigint>(
+      members.flatMap((m) =>
+        listings.map((l) => ({ address: l.token, abi: erc20Abi, functionName: "balanceOf", args: [m] })),
+      ),
+    ),
   ]);
 
   const rows = members.map((member, i) => {
@@ -159,7 +173,16 @@ export async function readStandings(id: number): Promise<Standing[]> {
     // Apply the contract's own ceiling. Showing an uncapped score would promise a standing that
     // settlement will not honour.
     const scoreBps = raw === null ? null : Math.min(raw, MAX_SCORE_BPS);
-    return { member, navStart, navNow, scoreBps, rank: 0 };
+
+    const shirts = listings
+      .filter((_, j) => {
+        const b = balances[i * listings.length + j];
+        return b.status === "success" && b.result > 0n;
+      })
+      .map((l) => l.ticker)
+      .sort((a, b) => POSITION_ORDER[positionOf(a)] - POSITION_ORDER[positionOf(b)]);
+
+    return { member, navStart, navNow, scoreBps, rank: 0, shirts };
   });
 
   // Highest score first. Members with no starting NAV sit at the bottom, in join order, which is

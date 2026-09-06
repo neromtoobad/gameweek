@@ -48,17 +48,17 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const league = await readLeague(leagueId).catch(() => null);
   if (!league) return fallback("Gameweek");
 
-  const standings = await readStandings(leagueId).catch(() => []);
-  const me = player
-    ? standings.find((s) => s.member.toLowerCase() === player.toLowerCase())
-    : undefined;
-
-  const points = me?.scoreBps == null ? null : pointsFromScore(me.scoreBps);
   // Read holdings directly rather than through readSide. The card does not need pool prices, and
   // pool discovery is six sequential multicalls that a social crawler will not wait for.
   const listings = hasContract()
     ? await readRegisteredListings().catch(() => LISTINGS)
     : LISTINGS;
+  const standings = await readStandings(leagueId, listings).catch(() => []);
+  const me = player
+    ? standings.find((s) => s.member.toLowerCase() === player.toLowerCase())
+    : undefined;
+
+  const points = me?.scoreBps == null ? null : pointsFromScore(me.scoreBps);
   const portfolio = player
     ? await readPortfolio(player as `0x${string}`, listings).catch(() => null)
     : null;

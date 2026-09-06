@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import { MiniAppReady } from "@/components/MiniAppReady";
+import { TabBar } from "@/components/TabBar";
 import { APP_URL, BASE_APP_ID } from "@/lib/config";
 import "./globals.css";
 
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <MiniAppReady />
           <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">{children}</div>
+          <TabBar />
         </Providers>
       </body>
     </html>

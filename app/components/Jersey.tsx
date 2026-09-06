@@ -18,7 +18,16 @@ import { logoFor } from "@/lib/logos";
  * Anything without a photograph falls back to a drawn shirt, so a newly listed stock still appears
  * on the pitch the moment it is registered rather than leaving a hole.
  */
-export function Jersey({ ticker, size = 44 }: { ticker: string; size?: number }) {
+export function Jersey({
+  ticker,
+  size = 44,
+  priority = false,
+}: {
+  ticker: string;
+  size?: number;
+  /** True for the shirts above the fold on the front page, so they are not lazy-loaded. */
+  priority?: boolean;
+}) {
   const label = ticker.replace(/c$/, "");
   const src = kitImageFor(ticker);
 
@@ -33,7 +42,7 @@ export function Jersey({ ticker, size = 44 }: { ticker: string; size?: number })
           // The pitch never shows these larger than a phone's width, so no source bigger is useful.
           sizes={`${size}px`}
           style={{ display: "block", objectFit: "contain" }}
-          priority={false}
+          priority={priority}
         />
         {/* The mark, printed large across the chest the way a kit carries its sponsor. These kits
             are generated without any lettering precisely so the real logo can own the shirt. */}

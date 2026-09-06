@@ -25,7 +25,7 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
   const leagueId = Number.parseInt(id, 10);
 
   return (
-    <main className="flex flex-1 flex-col gap-5 px-4 pb-16 pt-6">
+    <main className="flex flex-1 flex-col gap-5 px-4 pb-24 pt-6">
       <header className="flex items-center justify-between">
         <Link href="/" className="text-sm text-chalk-500 transition hover:text-chalk-300">
           ← Gameweek

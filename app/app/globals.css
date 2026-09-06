@@ -83,3 +83,139 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ------------------------------------------------------------------ type scale
+ * Fluid, so a headline is a headline on a phone and does not become a paragraph on a laptop.
+ */
+@theme {
+  --text-display: clamp(2rem, 6.5vw, 2.75rem);
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.03em;
+  --text-display--font-weight: 800;
+
+  --text-score: clamp(2.25rem, 9vw, 3.5rem);
+  --text-score--line-height: 1;
+  --text-score--letter-spacing: -0.04em;
+  --text-score--font-weight: 800;
+
+  /* one easing language for the whole product */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ------------------------------------------------------------------ interaction rules
+ * From the interaction-detail checklist: focus rings as box-shadow so they follow the radius, no
+ * iOS tap highlight, hover only where hover exists, press feedback proportional and fast.
+ */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-deep-950),
+    0 0 0 4px var(--color-cyan-400);
+}
+
+button,
+a {
+  transition:
+    transform 120ms var(--ease-out-soft),
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+button:active:not(:disabled),
+a.btn:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) {
+  .lift:hover {
+    transform: translateY(-3px);
+  }
+}
+
+/* ------------------------------------------------------------------ entrance
+ * Sections rise in with a small stagger. Fast enough to feel like a settle, not a show.
+ */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise {
+  animation: rise 420ms var(--ease-out-soft) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(46, 230, 168, 0.55);
+  }
+  60% {
+    box-shadow: 0 0 0 7px rgba(46, 230, 168, 0);
+  }
+}
+
+.live-dot {
+  animation: pulse-dot 1.8s ease-out infinite;
+}
+
+/* The pitch at night: a soft glow from the floodlights and a vignette at the edges. */
+.stadium {
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(53, 208, 255, 0.16) 0%, transparent 60%),
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(5, 8, 28, 0.55) 100%);
+}
+
+/* A shirt card's brand tint, set per tile from its kit colour. */
+.kit-tile {
+  background:
+    linear-gradient(160deg, color-mix(in oklab, var(--kit) 38%, transparent) 0%, transparent 58%),
+    var(--color-deep-900);
+  border-color: color-mix(in oklab, var(--kit) 45%, var(--color-line-800));
+}
+
+/* The player card in the draft deck: the same tint, thrown from the top like a spotlight. */
+.kit-card {
+  background:
+    radial-gradient(100% 70% at 50% 0%, color-mix(in oklab, var(--kit) 48%, transparent) 0%, transparent 72%),
+    linear-gradient(180deg, var(--color-deep-800) 0%, var(--color-deep-900) 100%);
+  border-color: color-mix(in oklab, var(--kit) 45%, var(--color-line-800));
+}
+
+/* An empty slot that is waiting for its pick breathes, so the eye knows where the next shirt goes. */
+@keyframes slot-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(53, 208, 255, 0.55);
+  }
+  60% {
+    box-shadow: 0 0 0 8px rgba(53, 208, 255, 0);
+  }
+}
+
+.slot-waiting {
+  animation: slot-pulse 1.6s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+  .live-dot,
+  .slot-waiting {
+    animation: none;
+  }
+}

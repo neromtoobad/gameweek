@@ -3,9 +3,8 @@
 import { useRef, useState } from "react";
 import type { Card } from "@/lib/draft";
 import { sharePrice, usd } from "@/lib/format";
-import { POSITION_LABEL } from "@/lib/squad";
+import { kitFor, POSITION_LABEL } from "@/lib/squad";
 import { Jersey } from "./Jersey";
-import { BrandMark } from "./BrandMark";
 
 const SWIPE_THRESHOLD = 90;
 
@@ -21,11 +20,12 @@ type Props = {
 };
 
 /**
- * One draftable stock.
+ * One draftable stock, as a player card.
  *
- * Dragging is done with pointer events rather than a gesture library: the deck is the centrepiece
- * of the demo, and a dependency that misbehaves on one phone is not worth the convenience. Buttons
- * do the same job for anyone on a desktop or using a keyboard.
+ * The shirt is the hero, lit from above in the kit's own colour, with the numbers underneath the
+ * way a sticker album prints them. Dragging is done with pointer events rather than a gesture
+ * library: the deck is the centrepiece of the demo, and a dependency that misbehaves on one phone
+ * is not worth the convenience. Buttons do the same job for anyone on a desktop or a keyboard.
  */
 export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, onSkip, depth }: Props) {
   const [dx, setDx] = useState(0);
@@ -38,6 +38,7 @@ export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, on
   const isTop = depth === 0;
   const gapBps = card.gapBps;
   const discount = gapBps !== null && gapBps < 0;
+  const kit = kitFor(card.listing.ticker);
 
   function onPointerDown(e: React.PointerEvent) {
     if (!isTop || leaving) return;
@@ -69,13 +70,15 @@ export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, on
   const offset = leaving === "draft" ? 500 : leaving === "skip" ? -500 : dx;
   const rotation = offset / 22;
   const intent = dx > 40 ? "draft" : dx < -40 ? "skip" : null;
+  // The stamp fades in with the drag, so it reads as a consequence of the gesture and not a label.
+  const stampOpacity = Math.min(1, Math.max(0, (Math.abs(dx) - 30) / 60));
 
   return (
     <div
       className="absolute inset-x-0 top-0 touch-none select-none"
       style={{
-        transform: `translateX(${offset}px) rotate(${rotation}deg) scale(${1 - depth * 0.04}) translateY(${depth * 10}px)`,
-        transition: dragging ? "none" : "transform 180ms ease-out, opacity 180ms ease-out",
+        transform: `translateX(${offset}px) rotate(${rotation}deg) scale(${1 - depth * 0.04}) translateY(${depth * 12}px)`,
+        transition: dragging ? "none" : "transform 220ms var(--ease-out-soft), opacity 180ms ease-out",
         opacity: leaving ? 0 : 1,
         zIndex: 10 - depth,
         pointerEvents: isTop ? "auto" : "none",
@@ -85,57 +88,65 @@ export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, on
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
     >
-      <div className="relative overflow-hidden rounded-3xl border border-line-800 bg-gradient-to-b from-deep-800 to-deep-900 p-5 shadow-2xl">
+      <div
+        className="kit-card relative overflow-hidden rounded-3xl border shadow-2xl"
+        style={{ ["--kit" as string]: kit.primary }}
+      >
         {intent && (
           <span
-            className={`absolute right-4 top-4 rounded-lg border px-2 py-1 text-xs font-bold uppercase tracking-wide ${
+            className={`absolute top-5 z-10 rounded-lg border-[3px] px-2.5 py-1 text-xl font-black uppercase tracking-widest ${
               intent === "draft"
-                ? "border-cyan-400 text-cyan-400"
-                : "border-chalk-500 text-chalk-500"
+                ? "left-5 -rotate-12 border-cyan-400 text-cyan-400"
+                : "right-5 rotate-12 border-chalk-300 text-chalk-300"
             }`}
+            style={{ opacity: stampOpacity }}
           >
             {intent === "draft" ? "Pick" : "Next"}
           </span>
         )}
 
-        <div className="flex items-center gap-3">
-          <Jersey ticker={card.listing.ticker} size={40} />
-          <div className="min-w-0">
-            <p className="font-mono text-xs text-chalk-500">
-              {card.listing.ticker} · {POSITION_LABEL[card.position]}
+        <div className="relative flex flex-col items-center px-5 pb-3.5 pt-4">
+          <div className="flex w-full items-center justify-between">
+            <span className="rounded-md bg-deep-950/60 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-chalk-300">
+              {POSITION_LABEL[card.position]}
+            </span>
+            {gapBps !== null && (
+              <span
+                className={`tnum rounded-md px-2 py-0.5 text-[11px] font-bold ${
+                  discount ? "bg-up/15 text-up" : gapBps > 0 ? "bg-down/15 text-down" : "bg-deep-800 text-chalk-300"
+                }`}
+              >
+                {discount ? "" : "+"}
+                {(gapBps / 100).toFixed(2)}% vs close
+              </span>
+            )}
+          </div>
+
+          <div className="my-2" style={{ filter: "drop-shadow(0 18px 24px rgba(0,0,0,0.5))" }}>
+            <Jersey ticker={card.listing.ticker} size={116} />
+          </div>
+
+          <h3 className="text-center text-[26px] font-extrabold leading-none tracking-tight">
+            {card.listing.name}
+          </h3>
+          <p className="mt-1.5 font-mono text-xs text-chalk-500">{card.listing.ticker}</p>
+        </div>
+
+        <div className="flex items-end justify-between border-t border-line-900 bg-deep-950/40 px-5 py-3.5">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-chalk-500">Price</p>
+            <p className="tnum text-[28px] font-extrabold leading-none tracking-tight">
+              {sharePrice(card.price * 100n)}
             </p>
-            <h3 className="flex items-center gap-2 text-2xl font-semibold leading-tight">
-              <BrandMark ticker={card.listing.ticker} size={20} color="var(--color-chalk-100)" />
-              <span className="truncate">{card.listing.name}</span>
-            </h3>
           </div>
-        </div>
-
-        <p className="tnum mt-3 text-4xl font-semibold">{sharePrice(card.price * 100n)}</p>
-
-        {gapBps !== null && (
-          <p className="mt-1.5 text-sm">
-            <span className={discount ? "text-up" : "text-down"}>
-              {discount ? "" : "+"}
-              {(gapBps / 100).toFixed(2)}%
-            </span>
-            <span className="text-chalk-500"> against Friday&rsquo;s close</span>
-          </p>
-        )}
-
-        <div className="mt-5 rounded-xl border border-line-900 bg-deep-950/50 px-4 py-3">
-          <div className="flex items-baseline justify-between">
-            <span className="text-xs uppercase tracking-wide text-chalk-500">Stake</span>
-            <span className="tnum font-semibold">{usd(stake)}</span>
-          </div>
-          <div className="mt-1 flex items-baseline justify-between">
-            <span className="text-xs uppercase tracking-wide text-chalk-500">You get</span>
-            <span className="tnum text-sm text-chalk-300">
+          <div className="text-right">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-chalk-500">Stake</p>
+            <p className="tnum text-xl font-bold leading-none">{usd(stake)}</p>
+            <p className="tnum mt-1 text-[11px] text-chalk-500">
               {(Number(expectedShares) / 1e8).toFixed(5)} shares
-            </span>
+            </p>
           </div>
         </div>
-
       </div>
     </div>
   );

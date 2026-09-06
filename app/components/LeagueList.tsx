@@ -38,16 +38,19 @@ export function LeagueList() {
 
   if (leagues.isError || (leagues.data?.length ?? 0) === 0) {
     return (
-      <p className="rounded-xl border border-dashed border-line-800 px-4 py-3 text-xs text-chalk-500">
-        No leagues open yet.
-      </p>
+      <div className="rounded-2xl border border-line-800 bg-deep-900/60 p-5 text-center">
+        <p className="text-base font-bold tracking-tight">No round open yet</p>
+        <p className="mt-1 text-sm text-chalk-500">
+          The first one opens today. Pick a side now so it is ready when the round locks.
+        </p>
+      </div>
     );
   }
 
   return (
     <section>
       <div className="mb-2">
-        <h2 className="text-base font-bold tracking-tight">Leagues</h2>
+        <h2 className="text-xl font-bold tracking-tight">Leagues</h2>
         <p className="text-xs text-chalk-500">Join one, pick a side, settle in 24 hours.</p>
       </div>
       <ul className="divide-y divide-line-900 overflow-hidden rounded-2xl border border-line-800 bg-deep-900/60">

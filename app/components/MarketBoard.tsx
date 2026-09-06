@@ -2,80 +2,94 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { marketState, readQuotes } from "@/lib/prices";
+import { readDexQuotes } from "@/lib/pools";
 import { LISTINGS } from "@/lib/tokens";
-import { ago, sharePrice } from "@/lib/format";
-import { BrandMark } from "./BrandMark";
+import { positionOf, type Position } from "@/lib/squad";
+import { ago } from "@/lib/format";
+import { KitTile } from "./KitTile";
 
 /**
- * The 13 listed stocks with live Chainlink prices.
+ * The board: every listed stock as a player card.
  *
- * The feeds run 24/5. When US markets are shut they hold the last close, which is exactly the
- * window Gameweek is built around, so the board says so rather than hiding it.
+ * Priced from Chainlink, with the pool's gap against that close on each card. The feeds run 24/5
+ * and hold the last close when US markets are shut, which is exactly the window this game is built
+ * around, so the board says so rather than hiding it.
  */
-export function MarketBoard() {
-  const quotes = useQuery({
-    queryKey: ["quotes"],
-    queryFn: () => readQuotes(),
-    refetchInterval: 60_000,
-  });
+const POSITION_ORDER: Record<Position, number> = { GK: 0, DEF: 1, FWD: 2 };
 
-  // With no quotes at all there is no market state to report, only an empty board.
+export function MarketBoard() {
+  const quotes = useQuery({ queryKey: ["quotes"], queryFn: () => readQuotes(), refetchInterval: 60_000 });
+  const dex = useQuery({ queryKey: ["dex"], queryFn: () => readDexQuotes(), refetchInterval: 60_000 });
+
   const state = quotes.data && quotes.data.length > 0 ? marketState(quotes.data) : null;
+  const closeByTicker = new Map((quotes.data ?? []).map((q) => [q.listing.ticker, q]));
+  const gapByTicker = new Map(
+    (dex.data ?? []).map((d) => {
+      const close = closeByTicker.get(d.listing.ticker)?.price;
+      const closeUsd6 = close ? close / 100n : null;
+      const gap = closeUsd6 && closeUsd6 > 0n ? Number(((d.price - closeUsd6) * 10_000n) / closeUsd6) : null;
+      return [d.listing.ticker, gap];
+    }),
+  );
+
+  // Keepers, then defenders, then forwards, the way a team sheet reads. Anything that cannot be
+  // fielded goes to the end rather than sitting between two shirts that can.
+  const cards = [...(quotes.data ?? [])].sort(
+    (a, b) =>
+      Number(!a.listing.live) - Number(!b.listing.live) ||
+      POSITION_ORDER[positionOf(a.listing.ticker)] - POSITION_ORDER[positionOf(b.listing.ticker)] ||
+      a.listing.name.localeCompare(b.listing.name),
+  );
 
   return (
-    <section>
-      <div className="mb-2 flex items-baseline justify-between gap-3">
+    <section id="board" className="rise" style={{ ["--i" as string]: 3 }}>
+      <div className="mb-3 flex items-end justify-between gap-3">
         <div>
-          <h2 className="text-base font-bold tracking-tight">The board</h2>
+          <h2 className="text-xl font-bold tracking-tight">The board</h2>
           <p className="text-xs text-chalk-500">Every stock you can field, priced live.</p>
         </div>
         {state && (
-          <span className="shrink-0 text-right text-xs text-chalk-500">
+          <span className="flex shrink-0 items-center gap-1.5 text-right text-xs text-chalk-500">
             {state.open ? (
-              <span className="text-up">Market open</span>
+              <>
+                <span className="live-dot h-2 w-2 rounded-full bg-up" />
+                <span className="font-semibold text-up">Live</span>
+              </>
             ) : (
-              <>Holding Friday close · {ago(state.youngest)}</>
+              <>Friday close · {ago(state.youngest)}</>
             )}
           </span>
         )}
       </div>
 
-      <ul className="divide-y divide-line-900 overflow-hidden rounded-2xl border border-line-800 bg-deep-900/60">
-        {quotes.isPending &&
-          LISTINGS.map((l) => (
-            <li key={l.ticker} className="flex h-[58px] items-center px-4">
-              <div className="h-3 w-24 animate-pulse rounded bg-line-800" />
-            </li>
+      {quotes.isPending ? (
+        <div className="grid grid-cols-2 gap-3">
+          {LISTINGS.slice(0, 6).map((l) => (
+            <div key={l.ticker} className="h-[196px] animate-pulse rounded-2xl border border-line-800 bg-deep-900" />
           ))}
-
-        {quotes.data?.map(({ listing, price }) => (
-          <li key={listing.ticker} className="flex items-center justify-between px-4 py-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <BrandMark ticker={listing.ticker} size={20} color="var(--color-chalk-300)" />
-              <div className="min-w-0">
-                <p className="truncate font-semibold">{listing.name}</p>
-                <p className="font-mono text-xs text-chalk-500">{listing.ticker}</p>
-              </div>
+        </div>
+      ) : quotes.isError || (quotes.data?.length ?? 0) === 0 ? (
+        <p className="rounded-2xl border border-dashed border-line-800 px-4 py-8 text-center text-sm text-chalk-500">
+          No prices right now.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {cards.map(({ listing, price }, i) => (
+            <div key={listing.ticker} className="rise" style={{ ["--i" as string]: 4 + i }}>
+              <KitTile
+                listing={listing}
+                price={price}
+                gapBps={gapByTicker.get(listing.ticker) ?? null}
+                muted={!listing.live}
+              />
             </div>
-            <div className="text-right">
-              <p className="tnum font-semibold">{sharePrice(price)}</p>
-              {!listing.live && (
-                <p className="text-[11px] text-chalk-500">not minted yet</p>
-              )}
-            </div>
-          </li>
-        ))}
+          ))}
+        </div>
+      )}
 
-        {(quotes.isError || quotes.data?.length === 0) && (
-          <li className="px-4 py-6 text-center text-sm text-chalk-500">
-            No prices right now.
-          </li>
-        )}
-      </ul>
-
-      <p className="mt-2 text-[11px] leading-relaxed text-chalk-500">
-        Prices from Chainlink equity feeds on Base. Three listings have no supply yet, so nothing can
-        be traded into them.
+      <p className="mt-3 text-[11px] leading-relaxed text-chalk-500">
+        The chip is the gap between what a stock trades for on Base right now and where it closed on
+        Friday. Three listings have nothing minted, so nothing can be traded into them.
       </p>
     </section>
   );

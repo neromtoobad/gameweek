@@ -13,6 +13,7 @@ import { saveSquad } from "@/lib/squadStore";
 import { usd } from "@/lib/format";
 import { SwipeCard } from "./SwipeCard";
 import { Pitch, type PitchSlot } from "./Pitch";
+import { Jersey } from "./Jersey";
 
 /** Keeper first, then the back two, then the front two. */
 const SLOT_ORDER: Position[] = ["GK", "DEF", "DEF", "FWD", "FWD"];
@@ -142,7 +143,7 @@ export function SquadBuilder() {
 
   return (
     <section className="flex flex-col gap-4">
-      <Pitch slots={slots} onSlotClick={clearSlot} activePosition={needed} />
+      <Pitch slots={slots} onSlotClick={clearSlot} activePosition={needed} height={270} />
 
       <div className="flex items-center justify-between text-xs text-chalk-500">
         <span>
@@ -159,7 +160,7 @@ export function SquadBuilder() {
 
       {!complete && card && (
         <>
-          <div className="relative h-[300px]">
+          <div className="relative h-[352px]">
             {candidates
               .slice(cursor, cursor + 3)
               .map((c, depth) => (
@@ -177,18 +178,22 @@ export function SquadBuilder() {
               .reverse()}
           </div>
 
-          <div className="flex gap-3">
+          {/* Pinned above the tab bar, so the two things you can do are never under it. */}
+          <div
+            className="sticky z-30 -mx-2 flex gap-3 rounded-2xl border border-line-800 bg-deep-950/85 p-2 backdrop-blur-md"
+            style={{ bottom: "calc(3.5rem + env(safe-area-inset-bottom) + 8px)" }}
+          >
             <button
               type="button"
               onClick={() => setCursor((i) => (i + 1) % candidates.length)}
-              className="flex-1 rounded-xl border border-line-800 px-4 py-3 font-semibold text-chalk-300 transition hover:text-chalk-100"
+              className="flex-1 rounded-xl border border-line-800 bg-deep-900 px-4 py-3 font-semibold text-chalk-300 transition hover:text-chalk-100"
             >
               Next
             </button>
             <button
               type="button"
               onClick={() => pick(card)}
-              className="flex-1 rounded-xl bg-base-500 px-4 py-3 font-bold text-white shadow-lg shadow-base-500/25 transition hover:bg-base-400"
+              className="flex-[1.6] truncate rounded-xl bg-base-500 px-4 py-3 font-bold text-white shadow-lg shadow-base-500/25 transition hover:bg-base-400"
             >
               Pick {card.listing.name}
             </button>
@@ -208,10 +213,14 @@ export function SquadBuilder() {
           <ul className="mt-2 divide-y divide-line-900">
             {filled.map((c, i) => (
               <li key={c.listing.ticker} className="flex items-center justify-between py-2">
-                <span className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{c.listing.ticker}</span>
+                <span className="flex items-center gap-2.5">
+                  <Jersey ticker={c.listing.ticker} size={30} />
+                  <span>
+                    <span className="block text-sm font-semibold leading-tight">{c.listing.name}</span>
+                    <span className="font-mono text-[11px] text-chalk-500">{c.listing.ticker}</span>
+                  </span>
                   {captain === i && (
-                    <span className="rounded bg-chalk-100 px-1 text-[9px] font-bold text-deep-950">
+                    <span className="rounded bg-chalk-100 px-1.5 py-0.5 text-[9px] font-bold text-deep-950">
                       C
                     </span>
                   )}
