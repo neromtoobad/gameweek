@@ -84,14 +84,14 @@ export function Pitch({
                 >
                   {empty ? (
                     <span
-                      className="flex h-11 w-11 items-center justify-center rounded-lg border border-dashed border-white/25 text-lg text-white/35"
+                      className="flex h-[52px] w-[52px] items-center justify-center rounded-lg border border-dashed border-white/25 text-lg text-white/35"
                       aria-hidden
                     >
                       +
                     </span>
                   ) : (
                     <span className="relative">
-                      <Jersey ticker={slot.ticker!} />
+                      <Jersey ticker={slot.ticker!} size={52} />
                       {slot.isCaptain && (
                         <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-chalk-100 text-[9px] font-bold text-pitch-950">
                           C

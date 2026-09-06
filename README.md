@@ -70,6 +70,16 @@ their score. Shipped mitigations: scores are capped at 5x, and both NAVs are emi
 can be audited against the wallet's transfer history. A future version routes funding through the
 contract so deposits can be subtracted.
 
+## The kits
+
+Each tradeable stock wears a football shirt in its company's colours with the ticker across the
+chest, the way a fantasy football side shows a player. The ten kits were generated from a single
+locked prompt so they share a camera angle, lighting setup and crop, then trimmed to transparent
+256px sprites and served from the app itself. Nothing on the pitch waits on an external image host.
+
+Real company logos were tried and dropped: image models return a plausible but wrong mark, and a
+garbled logo is worse than none. The ticker is the part that reads at shirt size anyway.
+
 ## What it costs
 
 A gameweek is a dollar. Measured onchain on 2026-09-06 at 0.006 gwei with ETH at $2,493:

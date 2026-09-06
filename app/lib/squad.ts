@@ -58,6 +58,28 @@ const FALLBACK_KIT: Kit = {
 };
 
 export const kitFor = (ticker: string): Kit => KITS[ticker] ?? FALLBACK_KIT;
+
+/**
+ * Tickers with a photographed kit in public/kits.
+ *
+ * Only the tradeable listings were shot. Anything else falls back to the drawn shirt, which is why
+ * that drawing is still in the codebase rather than deleted.
+ */
+const PHOTOGRAPHED = new Set([
+  "AAPLc",
+  "AMZNc",
+  "GOOGLc",
+  "METAc",
+  "MSFTc",
+  "MSTRc",
+  "NVDAc",
+  "SNDKc",
+  "SPCXc",
+  "TSLAc",
+]);
+
+export const kitImageFor = (ticker: string): string | null =>
+  PHOTOGRAPHED.has(ticker) ? `/kits/${ticker}.png` : null;
 export const positionOf = (ticker: string): Position => kitFor(ticker).position;
 
 /** Short name for the shirt, e.g. "Alphabet" becomes "GOOGL". */
