@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AccountBar } from "@/components/AccountBar";
 import { MarketBoard } from "@/components/MarketBoard";
 import { NextDraft } from "@/components/NextDraft";
@@ -14,6 +15,14 @@ export default function Home() {
       </header>
 
       <NextDraft />
+
+      <Link
+        href="/draft"
+        className="rounded-xl bg-turf-500 px-4 py-3 text-center font-semibold text-pitch-950 transition hover:bg-turf-400"
+      >
+        Open the draft
+      </Link>
+
       <AccountBar />
 
       {!GAMEWEEK && (

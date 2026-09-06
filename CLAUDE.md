@@ -72,6 +72,18 @@ where 1e10 = 10 ** (tokenDecimals 8 + feedDecimals 8 - usdcDecimals 6)
 ```
 Do not hardcode 1e10 in the contract. Compute the scale per token from stored decimals so a future 18-decimal B20 still works.
 
+LIQUIDITY, verified onchain 2026-09-06. The tradeable set is 10, not 13. Every listing with supply
+has an Aerodrome Slipstream pool against USDC at tick spacing 10, under factory
+`0xf8f2eB4940CFE7d13603DDDD87f123820Fc061Ef`. Note that is NOT the published Slipstream factory
+(`0x5e7BB104...`), whose router and quoter do not know these pools, which is why Gameweek routes
+itself. Aerodrome v2 volatile pools exist for a couple of tickers but hold about half a cent, so
+they are dust and must be ignored.
+
+Live weekend gaps on 2026-09-06, pool price against the Chainlink Friday close: AMZNc +9.5%,
+MSFTc +6.0%, SNDKc +2.9%, SPCXc +1.8%, TSLAc +0.9%, NVDAc +0.6%, AAPLc +0.5%, MSTRc +0.3%,
+GOOGLc +0.2%, METAc +0.1%. Everything traded at a premium to the close. The thin pools show the
+widest gaps, so depth has to be shown next to the number.
+
 ZERO SUPPLY as of 2026-09-06: COINc, CRCLc and INTCc have totalSupply 0. Nothing minted, so no Aerodrome liquidity and 0x will not route them. Ship with the 10 live tickers and let scripts/prices-check.ts decide the final list. Re-check before the demo, supply can appear at any time.
 
 Weekend behaviour confirmed live: on Sunday 06:21 UTC every feed's updatedAt was 33 to 40 hours old, holding the Friday close. The weekend gap badge premise is real.
@@ -223,12 +235,12 @@ Phase 2 — App shell
 - [ ] 2.3 Deploy to Vercel and confirm the connect popup works on a real phone. Needs a Vercel login. The passkey flow cannot be exercised headlessly.
 
 Phase 3 — Trading
-- [ ] 3.1 /api/quote proxy with swapFeeRecipient (treasury), swapFeeBps=50, swapFeeToken=USDC.
-- [ ] 3.2 SwipeDeck: 13 cards, right = buy $N, left = skip, up = sell all. Amount stepper $2/$5/$10.
-- [ ] 3.3 One `wallet_sendCalls` per swipe from the Sub Account, paymaster + dataSuffix. Toast with Basescan link.
+- [x] 3.1 DONE, differently. 0x is not used. GameweekRouter.sol swaps directly against the Slipstream pool and takes the 50 bps pot fee in the same call, so no API key and no HTTP hop sits in the demo's critical path. 17 tests including a fuzz run.
+- [x] 3.2 DONE. SwipeDeck with pointer-event dragging and equivalent buttons, 10 draftable cards ordered by pool depth, $2/$5/$10 stepper, budget ring, picks list with undo. Verified in a real browser against live pool prices.
+- [ ] 3.3 Batch is built (lib/execute.ts: one approve plus one swapExactIn per pick, atomic, paymaster capability attached) but unarmed until the router is deployed. The UI says "Router not deployed yet" rather than offering a button that cannot work.
 - [ ] 3.4 Portfolio strip: holdings priced live from /api/nav.
-- [ ] 3.5 Weekend gap badge on each card: DEX price vs Chainlink frozen close, green when under, red when over. /api/gap.
-- [ ] 3.6 Budget ring (weekly cap remaining) and trust strip: "Spot only. Your wallet. Your stocks." plus jurisdiction notice.
+- [x] 3.5 DONE. Gap is computed client-side from the pool's slot0 against the Chainlink close, so there is no API route to fail.
+- [x] 3.6 DONE. Budget ring on the draft screen, trust strip and jurisdiction notice on the home screen.
 - [ ] 3.7 Receipts tab: every swap for this league wallet with Basescan link and Builder Code suffix highlighted.
 
 Phase 4 — League loop
@@ -366,6 +378,11 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 - `setToken` reads `decimals()` from the token, so in a fork test the etch must happen before the registration call, not after.
 - `vm.expectRevert` claims the very next call. Reading a public constant like `league.MAX_MEMBERS()` inside the argument list consumes it and the test fails with "next call did not revert". Hoist those reads into locals first.
 - No testnet has the B20 stocks. Everything is mainnet with small amounts. Deploy costs cents on Base.
+- The public Base RPC throttles bursts, and viem reports a throttled batch as per-call failures that look exactly like reverts. A flatMap that drops failures silently blanks the whole board. lib/chain.ts `multicallResilient` retries only the failed entries; use it for every read.
+- Do not spend an RPC call on something address ordering already tells you. A pool's token0 is just the lower address, so USDC (0x83...) is always token0 against a B20 (0xb2...).
+- forge-std has no `.length` JSON path and no `[*]` projection, but `.listings[0].ticker` works.
+- Next.js dev analytics fails in a sandboxed browser and puts a red issue badge on the dev overlay. `NEXT_TELEMETRY_DISABLED=1` keeps a judge's console clean.
+- `next dev` writes its own app/AGENTS.md and app/CLAUDE.md. They are regenerated on every run, so commit them rather than fighting them. They are unrelated to this file.
 - `react-hooks/set-state-in-effect` rejects the usual "set the clock after mount" pattern. Use `useSyncExternalStore` with a cached snapshot and a null server snapshot, which also removes the hydration mismatch.
 - Turbopack walks up past the repo looking for a lockfile and finds one in the home directory. Pin `turbopack.root` in next.config.ts.
 - Configure git identity before the first commit. An AI-attributed commit got a past submission marked down.
@@ -390,5 +407,5 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 
 ## Status
 
-Phase: 2 mostly done. Contract complete (44 tests green, not yet deployed). App shell live with real mainnet prices. Next action: Day-0 proofs 0.1 to 0.5 and 0.7 to 0.8, which need API keys and funded wallets from PHASE_0_CHECKLIST.md. Phase 3 trading needs the 0x key.
+Phase: 3 mostly done. Contract complete (44 tests green, not yet deployed). Draft loop built and working in a browser against live Aerodrome prices. GameweekRouter written and tested but not deployed. Next action: deploy Gameweek and GameweekRouter to Base mainnet, which needs a funded deployer key from PHASE_0_CHECKLIST.md, then a $2 live swap to prove the loop end to end. No 0x key is needed any more.
 Deadline: UNKNOWN. Contract address: not deployed. Builder Code: not registered.

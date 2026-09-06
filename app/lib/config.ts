@@ -10,6 +10,11 @@ export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://mainnet.base.
 /** Set once the contract is deployed. Until then the league views show an empty state. */
 export const GAMEWEEK = (process.env.NEXT_PUBLIC_GAMEWEEK ?? "") as `0x${string}` | "";
 
+/** GameweekRouter, which executes draft picks and takes the fee that funds pots. */
+export const GAMEWEEK_ROUTER = (process.env.NEXT_PUBLIC_GAMEWEEK_ROUTER ?? "") as
+  | `0x${string}`
+  | "";
+
 /** ERC-8021 Builder Code suffix from base.dev, attached to every transaction we send. */
 export const BUILDER_CODE_SUFFIX = process.env.NEXT_PUBLIC_BUILDER_CODE_SUFFIX as
   | `0x${string}`

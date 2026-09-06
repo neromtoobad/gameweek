@@ -5,6 +5,8 @@ libs = ["lib"]
 solc = "0.8.28"
 optimizer = true
 optimizer_runs = 200
+# Base is Cancun-enabled; the router uses transient storage for its callback guard.
+evm_version = "cancun"
 via_ir = false
 remappings = [
     "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",

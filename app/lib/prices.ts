@@ -1,4 +1,4 @@
-import { publicClient, aggregatorAbi, erc20Abi } from "./chain";
+import { aggregatorAbi, erc20Abi, multicallResilient } from "./chain";
 import { LISTINGS, type Listing } from "./tokens";
 import { USDC } from "./config";
 
@@ -20,21 +20,16 @@ export type Quote = {
  * not, it labels them.
  */
 export async function readQuotes(listings: Listing[] = LISTINGS): Promise<Quote[]> {
-  const results = await publicClient.multicall({
-    contracts: listings.map((l) => ({
-      address: l.feed,
-      abi: aggregatorAbi,
-      functionName: "latestRoundData" as const,
-    })),
-    allowFailure: true,
-  });
+  const results = await multicallResilient<readonly [bigint, bigint, bigint, bigint, bigint]>(
+    listings.map((l) => ({ address: l.feed, abi: aggregatorAbi, functionName: "latestRoundData" })),
+  );
 
   const now = Math.floor(Date.now() / 1000);
 
   return listings.flatMap((listing, i) => {
     const r = results[i];
     if (r.status !== "success") return [];
-    const [, answer, , updatedAt] = r.result as readonly [bigint, bigint, bigint, bigint, bigint];
+    const [, answer, , updatedAt] = r.result;
     if (answer <= 0n) return [];
     return [{ listing, price: answer, updatedAt: Number(updatedAt), age: now - Number(updatedAt) }];
   });
@@ -60,30 +55,27 @@ export type Holding = { listing: Listing; balance: bigint; price: bigint; usd6: 
  */
 export async function readPortfolio(wallet: `0x${string}`, listings: Listing[] = LISTINGS) {
   const [balances, quotes] = await Promise.all([
-    publicClient.multicall({
-      contracts: [
-        { address: USDC, abi: erc20Abi, functionName: "balanceOf" as const, args: [wallet] },
-        ...listings.map((l) => ({
-          address: l.token,
-          abi: erc20Abi,
-          functionName: "balanceOf" as const,
-          args: [wallet] as const,
-        })),
-      ],
-      allowFailure: true,
-    }),
+    multicallResilient<bigint>([
+      { address: USDC, abi: erc20Abi, functionName: "balanceOf", args: [wallet] },
+      ...listings.map((l) => ({
+        address: l.token,
+        abi: erc20Abi,
+        functionName: "balanceOf",
+        args: [wallet],
+      })),
+    ]),
     readQuotes(listings),
   ]);
 
   const priceByTicker = new Map(quotes.map((q) => [q.listing.ticker, q.price]));
 
-  const cash = balances[0].status === "success" ? (balances[0].result as bigint) : 0n;
+  const cash = balances[0].status === "success" ? balances[0].result : 0n;
 
   const holdings: Holding[] = [];
   listings.forEach((listing, i) => {
     const r = balances[i + 1];
     if (r.status !== "success") return;
-    const balance = r.result as bigint;
+    const balance = r.result;
     if (balance === 0n) return;
     const price = priceByTicker.get(listing.ticker);
     if (!price) return;

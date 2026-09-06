@@ -10,6 +10,50 @@ export const publicClient = createPublicClient({
   transport: http(RPC_URL, { batch: true }),
 });
 
+type MulticallEntry = { address: `0x${string}`; abi: readonly unknown[]; functionName: string; args?: readonly unknown[] };
+export type MulticallResult<T> = { status: "success"; result: T } | { status: "failure" };
+
+/**
+ * A multicall that survives a rate-limited RPC.
+ *
+ * Public Base RPCs throttle bursts, and viem reports a throttled batch as a per-call failure that
+ * looks exactly like a reverted call. Dropping those silently makes a whole board of prices vanish,
+ * so failed entries are retried on their own with a short backoff. Whatever still fails after the
+ * last attempt is genuinely unavailable.
+ */
+export async function multicallResilient<T = unknown>(
+  contracts: MulticallEntry[],
+  { attempts = 3, delayMs = 400 }: { attempts?: number; delayMs?: number } = {},
+): Promise<MulticallResult<T>[]> {
+  const out: MulticallResult<T>[] = contracts.map(() => ({ status: "failure" }));
+  let pending = contracts.map((_, i) => i);
+
+  for (let attempt = 0; attempt < attempts && pending.length > 0; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, delayMs * attempt));
+
+    let results;
+    try {
+      results = (await publicClient.multicall({
+        // viem's contract typing is stricter than this generic helper needs.
+        contracts: pending.map((i) => contracts[i]) as never,
+        allowFailure: true,
+      })) as unknown as ReadonlyArray<{ status: "success"; result: unknown } | { status: "failure" }>;
+    } catch {
+      continue; // whole batch rejected, try again
+    }
+
+    const stillPending: number[] = [];
+    pending.forEach((originalIndex, j) => {
+      const r = results[j];
+      if (r.status === "success") out[originalIndex] = { status: "success", result: r.result as T };
+      else stillPending.push(originalIndex);
+    });
+    pending = stillPending;
+  }
+
+  return out;
+}
+
 export const erc20Abi = [
   { type: "function", name: "balanceOf", stateMutability: "view", inputs: [{ name: "account", type: "address" }], outputs: [{ type: "uint256" }] },
   { type: "function", name: "decimals", stateMutability: "view", inputs: [], outputs: [{ type: "uint8" }] },

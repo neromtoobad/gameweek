@@ -15,10 +15,13 @@ Coinbase Developer Platform (portal.cdp.coinbase.com)
 - [ ] Create a project named `gameweek`.
 - [ ] Onchain Tools -> Paymaster -> enable Base Mainnet. Copy the RPC URL into `NEXT_PUBLIC_PAYMASTER_URL`.
 - [ ] Set Paymaster per-user limit (suggest $1 per user per day) and a global cap (suggest $20). Contract allowlist gets filled in Phase 1 after deploy: Gameweek, USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`, and the 0x AllowanceHolder address returned in `issues.allowance.spender`.
-- [ ] Node -> Base Mainnet RPC URL. Copy into `BASE_RPC_URL`. Do not rely on the public `https://mainnet.base.org` endpoint for fork tests, it rate-limits.
+- [ ] Node -> Base Mainnet RPC URL. Copy into `BASE_RPC_URL` and `NEXT_PUBLIC_RPC_URL`. The public `https://mainnet.base.org` endpoint throttles hard: a 78-call multicall lost 28 entries during development. The app retries around it, but the demo should not have to.
 - [ ] Optional: apply for Base gas credits from the Paymaster page.
 
-0x (dashboard.0x.org)
+0x (dashboard.0x.org) — NO LONGER NEEDED
+- [x] Dropped 2026-09-06. GameweekRouter swaps directly against the Aerodrome Slipstream pool and
+      takes the pot fee in the same call, so there is no API key and no HTTP hop in the draft path.
+      Keep the steps below only if you later want aggregator pricing across venues.
 - [ ] Create an app, copy the API key into `ZEROEX_API_KEY`.
 - [ ] Prove it works (replace the taker with any address):
 ```
@@ -139,7 +142,7 @@ Fill the right column. Defaults are recommendations.
 
 | Parameter | Default | Decision |
 |---|---|---|
-| 0x swap fee | 50 bps, taken in USDC | |
+| Router fee | 50 bps, taken in USDC by GameweekRouter, capped at 100 bps onchain | |
 | Slippage | 100 bps, 150 for thin tickers | |
 | Default league budget | 20 USDC | |
 | Swipe sizes | 2 / 5 / 10 USDC | |
@@ -156,7 +159,7 @@ Fill the right column. Defaults are recommendations.
 | Funding mode | Auto Spend Permissions first; switch to explicit `requestSpendPermission` weekly cap only if it costs under 2 hours | |
 | Bot budget and sizing | 50 USDC total, 3 equal-weight picks, temperature 0 | |
 | Bot draft time | Sunday 20:00 UTC | |
-| Ticker list | 10 live (COINc, CRCLc, INTCc have zero supply, drop them) minus any failing prices-check | |
+| Ticker list | 10 draftable (COINc, CRCLc, INTCc have no supply and no pool). Confirm with `bun run check:pools` before the demo | |
 | Treasury sponsor policy | 100% of accrued fees into that week's leagues, split by member count | |
 | Coach refresh | Once per day at 06:00 UTC, cached in a JSON file, static fallback for the demo | |
 | Data stored offchain | None. No accounts, no emails | |

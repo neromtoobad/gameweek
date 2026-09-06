@@ -10,15 +10,30 @@ your friends all week. Every swipe is a real swap into your own wallet. On Frida
 contract reads Chainlink, ranks the league, and pays a USDC pot to the top three. Then the next
 draft opens.
 
-Status: contract complete and tested. Application in progress.
+Status: contracts complete and tested, 61 tests green. Draft loop working against live Aerodrome
+prices. Not yet deployed.
+
+## Drafting
+
+The deck offers the ten tokenized stocks that actually have an onchain pool. Each card shows the
+live pool price and how far it sits from Friday's close, which is the number that only exists
+because Base keeps trading after Wall Street shuts.
+
+A pick is a real swap. `GameweekRouter` sends the trade to the Aerodrome Slipstream pool and takes
+the 50 basis point fee that funds league pots, in one call. A whole draft is one batched
+transaction, so a player signs once and never ends up holding two of three picks.
+
+Gameweek routes itself rather than calling an aggregator, for two reasons. The published Slipstream
+periphery points at a different factory and does not know about these pools. And a demo should not
+have an HTTP request in the middle of its critical path.
 
 ## Repository
 
 | Path | What |
 |---|---|
-| `contracts/` | Foundry project. `Gameweek.sol`, unit tests, Base mainnet fork tests, deploy scripts |
+| `contracts/` | Foundry project. `Gameweek.sol`, `GameweekRouter.sol`, unit tests, Base mainnet fork tests, deploy scripts |
 | `contracts/config/tokens.json` | The 13 tokenized stocks with their Chainlink feeds, verified onchain |
-| `app/` | Next.js web app (not started) |
+| `app/` | Next.js web app: live board, swipe-to-draft deck, onchain pricing |
 
 ## Contract
 

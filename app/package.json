@@ -9,7 +9,8 @@
     "lint": "eslint",
     "gen:abi": "bun run scripts/gen-abi.ts",
     "check:tokens": "bun run scripts/check-tokens.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:pools": "bun run scripts/check-pools.ts"
   },
   "dependencies": {
     "@base-org/account": "2.5.10",
