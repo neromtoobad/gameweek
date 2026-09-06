@@ -1,0 +1,28 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Gameweek",
+    "subtitle": "Fantasy football, real stocks",
+    "description": "A daily fantasy league where the players are real Coinbase Tokenized Stocks. Pick five in a 1-2-2, name a captain, and they are bought into your own wallet on Base.",
+    "iconUrl": "https://gameweek-bay.vercel.app/icon-1024.png",
+    "homeUrl": "https://gameweek-bay.vercel.app",
+    "splashImageUrl": "https://gameweek-bay.vercel.app/splash.png",
+    "splashBackgroundColor": "#0d2b18",
+    "primaryCategory": "finance",
+    "tags": [
+      "stocks",
+      "fantasy",
+      "trading",
+      "defi",
+      "game"
+    ],
+    "requiredChains": [
+      "eip155:8453"
+    ]
+  }
+}
