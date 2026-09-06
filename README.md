@@ -87,6 +87,25 @@ across the chest the way a kit carries its sponsor. The marks come from Simple I
 vector paths, inlined rather than fetched, so they stay sharp from a 52px shirt to a 1200px share
 card. They are trademarks of their owners, used to identify the stock a shirt represents.
 
+## Sunday Bot
+
+Every league has a bot in it, with its own wallet and its own money. Before each round it reads the
+board, fields a legal 1-2-2, names a captain and buys the stocks itself.
+
+Its strategy is one line: buy whatever the weekend left behind. Every stock carries a gap between
+what it trades for on Base right now and where Wall Street left it on Friday, and the bot fills each
+position with the names carrying the smallest gap, captaining the biggest discount.
+
+It does not call a model. A side that depends on an HTTP request is a side that fails to get picked
+the one evening the API is slow, and "the model liked it" is not a strategy anyone can check. This
+one is readable from the chain, testable, and can be wrong, which is the point: it gives a human
+something to beat and a reason to disagree.
+
+```bash
+bun run bot          # show the side it would field
+bun run bot --send   # join the league and buy it
+```
+
 ## What it costs
 
 A gameweek is a dollar. Measured onchain on 2026-09-06 at 0.006 gwei with ETH at $2,493:

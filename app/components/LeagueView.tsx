@@ -9,6 +9,8 @@ import { sendLeagueAction } from "@/lib/leagueActions";
 import { useNowSeconds } from "@/lib/useNow";
 import { matchdayNumber } from "@/lib/gameweek";
 import { countdown, shortAddress, usd } from "@/lib/format";
+import { BOT_ADDRESS } from "@/lib/config";
+import { STRATEGY_LINE, STRATEGY_NAME } from "@/lib/strategy";
 import { txUrl } from "@/lib/config";
 import { Leaderboard } from "./Leaderboard";
 import { MySide } from "./MySide";
@@ -81,6 +83,7 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
 
   // Show the selected player if one was tapped, otherwise your own side once you have joined.
   const shown = viewing ?? (joined ? wallet : null);
+  const botIsPlaying = Boolean(BOT_ADDRESS) && rows.some((r) => r.member.toLowerCase() === BOT_ADDRESS);
   const isOwnSide = Boolean(shown && wallet && shown.toLowerCase() === wallet.toLowerCase());
 
   const copy = PHASE_COPY[phase];
@@ -234,6 +237,13 @@ export function LeagueView({ id, spectator = false }: { id: number; spectator?: 
         </p>
       )}
       {error && <p className="text-center text-xs text-down">{error}</p>}
+
+      {botIsPlaying && (
+        <p className="rounded-xl border border-line-800 bg-pitch-900/60 px-4 py-2.5 text-[11px] leading-relaxed text-chalk-500">
+          <span className="font-semibold text-chalk-300">{STRATEGY_NAME}</span> is in this league. It
+          is an agent with its own wallet and its own money. {STRATEGY_LINE} Beat it.
+        </p>
+      )}
 
       <p className="text-[11px] leading-relaxed text-chalk-500">
         Locking and settling are open to anyone, so a league never depends on us being around. Every

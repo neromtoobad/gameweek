@@ -1,6 +1,6 @@
 "use client";
 
-import { addressUrl } from "@/lib/config";
+import { addressUrl, BOT_ADDRESS } from "@/lib/config";
 import { shortAddress, usd } from "@/lib/format";
 import { formatPoints, pointsFromScore } from "@/lib/points";
 import type { Standing } from "@/lib/leagues";
@@ -41,6 +41,7 @@ export function Leaderboard({
       {standings.map((s) => {
         const isYou = you && s.member.toLowerCase() === you.toLowerCase();
         const isSelected = selected && s.member.toLowerCase() === selected.toLowerCase();
+        const isBot = BOT_ADDRESS && s.member.toLowerCase() === BOT_ADDRESS;
         const delta = s.scoreBps === null ? null : (s.scoreBps - 10_000) / 100;
         const tone = delta === null ? "text-flat" : delta > 0 ? "text-up" : delta < 0 ? "text-down" : "text-flat";
 
@@ -75,6 +76,11 @@ export function Leaderboard({
                 </a>
               )}
               {isYou && <span className="ml-2 text-xs text-turf-400">you</span>}
+              {isBot && (
+                <span className="ml-2 rounded bg-chalk-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-chalk-300">
+                  bot
+                </span>
+              )}
               {s.scoreBps === null && (
                 <p className="text-[11px] text-chalk-500">not funded, will be skipped</p>
               )}

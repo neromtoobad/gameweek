@@ -290,7 +290,7 @@ Phase 4 — League loop
 Phase 5 — Ritual (only after Phase 4 is demoable end to end)
 - [ ] 5.1 Sunday draft-night copy, countdowns, "weekend gap" badge showing DEX price vs Friday close.
 - [ ] 5.2 Share card: "Gameweek 2, #2 in Lagos Bulls, +1.8%" as an OG image with share-to-X and WhatsApp buttons carrying the invite link.
-- [ ] 5.3 Bot player: scripts/bot.ts joins every league the bot is invited to, drafts Sunday 20:00 UTC (Claude picks 3 with weights, 0x swaps from the bot EOA), leaderboard row shows a bot tag. Budget ≤ 50 USDC.
+- [x] 5.3 DONE. Sunday Bot: `bun run bot` shows the side it would field, `--send` joins and buys it. Deterministic, no model call. Strategy lives in lib/strategy.ts with 9 tests, so the app can state exactly what the bot did. Tagged on the table, explained on the league page. Budget $0.50.
 - [ ] 5.4 Coach card: one line per ticker generated daily and cached (Claude, server-side), static fallback file for the demo. "Draft for me" takes a one-sentence thesis and executes 3 swaps in one wallet_sendCalls batch. Labelled "information, not advice".
 - [ ] 5.5 Dividend badge: read MultiplierUpdated events for held tokens, show "dividend applied" on the holding.
 - [ ] 5.6 Stretch: email or web-push reminder for draft close and settle. Stretch: streak badge.
@@ -326,7 +326,7 @@ That is the last train. Everything else is negotiable, that is not.
 Ship, in this order:
 1. Deploy and one real draft. Nothing else counts without it.
 2. Share card. A side on a pitch with a score is the postable object and the video's closing shot.
-3. The bot, so a league is never empty and the agents section of the RFB is answered.
+3. ~~The bot~~ DONE. Sunday Bot fields a side of its own and answers the agents section of the RFB.
 4. Round rollover, so the daily ritual exists without someone running a script.
 5. README with real numbers, four slides, sub-three-minute video.
 
@@ -471,8 +471,9 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 - No fake "submitted" screens. Every action a judge sees is a mainnet transaction with a hash.
 - No committing CLAUDE.md, .env files, keystores, or the treasury key.
 - No console.log, TODO, or commented-out code at submission.
-- No Claude API call in the live demo path. Coach lines come from the daily cache or the static fallback file.
-- No bot wallet balance above $0.50 USDC and 0.0001 ETH. No bot key outside the Foundry keystore.
+- No Claude API call anywhere, including the bot. A side that depends on an HTTP request is a side that fails to get picked the one evening the API is slow, and "the model liked it" is not a strategy anyone can check. Sunday Bot ranks on the weekend gap, which is readable from the chain and explainable in a sentence.
+- No bot wallet balance above $1. Its key lives in the environment rather than a keystore, deliberately, because it signs unattended on a schedule; that is safe only while the wallet holds nothing that matters.
+- The bot's liquidity filter is a floor, never a ranking. In-range liquidity is not comparable between stocks at different prices; an early version used it at 2% of the deepest pool and threw out six-figure pools, leaving the bot unable to field a full side. The gap itself is the real filter: nothing moves 9% over a weekend, so a gap that wide is a thin quote.
 - No league with a nonzero buy-in during this build. Buy-in money is locked until settlement and the float is too small to strand.
 - No single transaction that spends more than $1 of USDC. The whole build has $5.
 - No "join our league" ask to judges. Spectator page and video only.

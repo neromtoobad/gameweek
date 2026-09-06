@@ -15,6 +15,9 @@ export const GAMEWEEK_ROUTER = (process.env.NEXT_PUBLIC_GAMEWEEK_ROUTER ?? "") a
   | `0x${string}`
   | "";
 
+/** Sunday Bot's wallet, so the table can mark it. It plays like anyone else, it is just not human. */
+export const BOT_ADDRESS = (process.env.NEXT_PUBLIC_BOT_ADDRESS ?? "").toLowerCase();
+
 /** ERC-8021 Builder Code suffix from base.dev, attached to every transaction we send. */
 export const BUILDER_CODE_SUFFIX = process.env.NEXT_PUBLIC_BUILDER_CODE_SUFFIX as
   | `0x${string}`
