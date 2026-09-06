@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pitch-950: #06110c;
+  --color-pitch-900: #0a1a12;
+  --color-pitch-800: #0f2519;
+  --color-pitch-700: #16351f;
+
+  --color-line-900: #12211a;
+  --color-line-800: #1b3126;
+
+  --color-turf-400: #4ade80;
+  --color-turf-500: #22c55e;
+  --color-turf-600: #16a34a;
+
+  --color-chalk-100: #f2f7f4;
+  --color-chalk-300: #b8c9bf;
+  --color-chalk-500: #7d9187;
+
+  --color-up: #34d399;
+  --color-down: #f87171;
+  --color-flat: #94a3b8;
+
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+html {
+  background: var(--color-pitch-950);
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background:
+    radial-gradient(1200px 500px at 50% -10%, rgba(34, 197, 94, 0.10), transparent 70%),
+    var(--color-pitch-950);
+  color: var(--color-chalk-100);
+  min-height: 100dvh;
+  /* Nothing on a phone should ever scroll sideways. */
+  overflow-x: hidden;
+}
+
+/* Numbers in tables and leaderboards must line up column to column. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
