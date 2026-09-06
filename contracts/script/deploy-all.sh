@@ -38,8 +38,11 @@ CHAIN=$(cast chain-id --rpc-url "$BASE_RPC_URL" 2>/dev/null) || fail "Cannot rea
 [ "$CHAIN" = "8453" ] || fail "Expected Base mainnet (8453), got chain $CHAIN"
 echo "  rpc        ok, chain $CHAIN"
 
-cast wallet list 2>/dev/null | grep -q "^$ACCOUNT " \
-  || fail "No keystore account named '$ACCOUNT'. Create one with: cast wallet import $ACCOUNT --interactive"
+# Check the keystore file rather than parsing `cast wallet list`, whose output is formatted for
+# humans and does not print the bare account name.
+KEYSTORE_DIR="${FOUNDRY_KEYSTORES_DIR:-$HOME/.foundry/keystores}"
+[ -f "$KEYSTORE_DIR/$ACCOUNT" ] \
+  || fail "No keystore account named '$ACCOUNT' in $KEYSTORE_DIR. Create one with: cast wallet import $ACCOUNT --interactive"
 
 # This is the one password prompt. Everything after it reuses the unlocked address.
 DEPLOYER=$(cast wallet address --account "$ACCOUNT") || fail "Could not unlock '$ACCOUNT'"
