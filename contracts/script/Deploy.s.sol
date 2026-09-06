@@ -5,6 +5,7 @@ import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Gameweek} from "../src/Gameweek.sol";
+import {GameweekRouter} from "../src/GameweekRouter.sol";
 
 /// @notice Deploys Gameweek to Base mainnet.
 ///
@@ -18,22 +19,32 @@ import {Gameweek} from "../src/Gameweek.sol";
 ///      touches a B20 address dies with `EvmError: OpcodeNotFound` even when --broadcast is set.
 ///      Registration therefore runs through `cast send`, which submits straight to the node:
 ///
-///        ./script/register-tokens.sh 0xYourLeagueAddress
+///        ./script/register-tokens.sh 0xYourGameweekAddress
 contract Deploy is Script {
     using stdJson for string;
 
-    function run() external returns (Gameweek league) {
+    /// @notice Fee taken on each draft pick, in basis points. Funds league pots.
+    uint16 constant FEE_BPS = 50;
+
+    function run() external returns (Gameweek gameweek, GameweekRouter router) {
         string memory json = vm.readFile("config/tokens.json");
         address usdc = json.readAddress(".usdc");
 
+        // The treasury collects router fees. Defaults to the deployer so a first deploy needs no
+        // extra setup; point it at a dedicated address with TREASURY=0x... once you have one.
+        address treasury = vm.envOr("TREASURY", msg.sender);
+
         vm.startBroadcast();
-        league = new Gameweek(usdc, msg.sender);
+        gameweek = new Gameweek(usdc, msg.sender);
+        router = new GameweekRouter(msg.sender, treasury, FEE_BPS);
         vm.stopBroadcast();
 
-        console.log("Gameweek deployed at", address(league));
-        console.log("owner", msg.sender);
-        console.log("usdc", usdc);
-        console.log("Next: run ./script/register-tokens.sh with the address above");
+        console.log("GAMEWEEK        ", address(gameweek));
+        console.log("ROUTER          ", address(router));
+        console.log("OWNER           ", msg.sender);
+        console.log("TREASURY        ", treasury);
+        console.log("FEE_BPS         ", FEE_BPS);
+        console.log("Next: ./script/register-tokens.sh <GAMEWEEK address>");
     }
 }
 

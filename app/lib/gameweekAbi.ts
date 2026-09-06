@@ -490,6 +490,24 @@ export const gameweekAbi = [
   },
   {
     "type": "function",
+    "name": "setTokens",
+    "inputs": [
+      {
+        "name": "tokenList",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "feeds",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "settle",
     "inputs": [
       {
@@ -1008,6 +1026,11 @@ export const gameweekAbi = [
   {
     "type": "error",
     "name": "LeagueFull",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LengthMismatch",
     "inputs": []
   },
   {

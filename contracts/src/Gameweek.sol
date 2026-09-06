@@ -147,6 +147,7 @@ contract Gameweek is Ownable, ReentrancyGuard {
     error ScaleUnderflow();
     error UnknownToken();
     error ZeroAddress();
+    error LengthMismatch();
 
     // ---------------------------------------------------------------- constructor
 
@@ -160,6 +161,22 @@ contract Gameweek is Ownable, ReentrancyGuard {
     /// @notice Register or update a scoreable token and its Chainlink feed.
     /// @dev Reads decimals from both sides so the NAV scale is never hardcoded.
     function setToken(address token, address feed) external onlyOwner {
+        _setToken(token, feed);
+    }
+
+    /// @notice Register many tokens in one transaction.
+    /// @dev Registration is always its own transaction, because `setToken` reads decimals() from a
+    ///      B20 address and forge cannot simulate a node precompile. Doing all of them at once means
+    ///      one signature and no chance of a half-registered contract.
+    function setTokens(address[] calldata tokenList, address[] calldata feeds) external onlyOwner {
+        uint256 n = tokenList.length;
+        if (n != feeds.length) revert LengthMismatch();
+        for (uint256 i; i < n; ++i) {
+            _setToken(tokenList[i], feeds[i]);
+        }
+    }
+
+    function _setToken(address token, address feed) internal {
         if (token == address(0) || feed == address(0)) revert ZeroAddress();
 
         uint256 td = IERC20Metadata(token).decimals();

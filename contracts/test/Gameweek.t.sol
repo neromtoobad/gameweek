@@ -115,6 +115,56 @@ contract GameweekTest is Test {
         gameweek.setToken(address(tiny), address(tinyFeed));
     }
 
+    function test_setTokens_registersManyInOneCall() public {
+        MockToken tsla = new MockToken("Tesla", "TSLAc", 8);
+        MockToken msft = new MockToken("Microsoft", "MSFTc", 8);
+        MockFeed tslaFeed = new MockFeed(8, 353_33000000);
+        MockFeed msftFeed = new MockFeed(8, 499_78000000);
+
+        address[] memory toks = new address[](2);
+        address[] memory feeds = new address[](2);
+        toks[0] = address(tsla);
+        toks[1] = address(msft);
+        feeds[0] = address(tslaFeed);
+        feeds[1] = address(msftFeed);
+
+        vm.prank(owner);
+        gameweek.setTokens(toks, feeds);
+
+        assertEq(gameweek.tokenCount(), 4, "two already registered in setUp, two more now");
+        (address feed, uint256 scale, bool enabled) = gameweek.tokenInfo(address(tsla));
+        assertEq(feed, address(tslaFeed));
+        assertEq(scale, 1e10);
+        assertTrue(enabled);
+
+        // And they price correctly straight away.
+        tsla.mint(alice, 1e8);
+        assertEq(gameweek.navOf(alice), 353_330000);
+    }
+
+    function test_setTokens_rejectsRaggedInput() public {
+        address[] memory toks = new address[](2);
+        address[] memory feeds = new address[](1);
+        toks[0] = address(nvda);
+        toks[1] = address(aapl);
+        feeds[0] = address(nvdaFeed);
+
+        vm.prank(owner);
+        vm.expectRevert(Gameweek.LengthMismatch.selector);
+        gameweek.setTokens(toks, feeds);
+    }
+
+    function test_setTokens_onlyOwner() public {
+        address[] memory toks = new address[](1);
+        address[] memory feeds = new address[](1);
+        toks[0] = address(nvda);
+        feeds[0] = address(nvdaFeed);
+
+        vm.prank(alice);
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, alice));
+        gameweek.setTokens(toks, feeds);
+    }
+
     function test_setToken_onlyOwner() public {
         vm.prank(alice);
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, alice));
