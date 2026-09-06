@@ -16,7 +16,8 @@ out/
 # foundry
 contracts/cache/
 contracts/out/
-contracts/broadcast/*/dry-run/
+contracts/broadcast/**/dry-run/
+.gstack/
 contracts/lib/
 
 # os
