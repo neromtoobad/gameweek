@@ -120,12 +120,12 @@ export function SquadBuilder() {
   }));
 
   if (market.isPending) {
-    return <div className="h-[520px] animate-pulse rounded-3xl border border-line-800 bg-deep-900/60" />;
+    return <div className="h-[520px] animate-pulse rounded-3xl border border-line-800 bg-deep-900" />;
   }
 
   if (market.isError || deck.length === 0) {
     return (
-      <div className="rounded-3xl border border-line-800 bg-deep-900/60 p-6 text-center">
+      <div className="rounded-3xl border border-line-800 bg-deep-900 p-6 text-center">
         <p className="text-sm text-chalk-300">No draftable stocks right now.</p>
         <p className="mt-1 text-xs text-chalk-500">
           A stock is only draftable once it has an onchain pool to buy it from.
@@ -145,15 +145,27 @@ export function SquadBuilder() {
     <section className="flex flex-col gap-4">
       <Pitch slots={slots} onSlotClick={clearSlot} activePosition={needed} height={270} />
 
-      <div className="flex items-center justify-between text-xs text-chalk-500">
-        <span>
-          {complete
-            ? captain === null
-              ? "Tap a shirt to give them the armband"
-              : "Squad set"
-            : `${POSITION_LABEL[needed!]} · ${filled.length + 1} of ${SQUAD_SIZE}`}
+      <div className="flex items-center justify-between">
+        <span className="hed text-[20px] tracking-[0.04em]">
+          {complete ? (
+            captain === null ? (
+              <>
+                Tap a shirt for the <span className="text-volt">armband</span>
+              </>
+            ) : (
+              "Squad set"
+            )
+          ) : (
+            <>
+              {POSITION_LABEL[needed!]} <span className="text-chalk-500">· {filled.length + 1} of {SQUAD_SIZE}</span>
+            </>
+          )}
         </span>
-        <button type="button" onClick={reset} className="transition hover:text-chalk-300">
+        <button
+          type="button"
+          onClick={reset}
+          className="hed text-[12px] tracking-[0.1em] text-chalk-500 transition hover:text-chalk-300"
+        >
           Start again
         </button>
       </div>
@@ -180,35 +192,36 @@ export function SquadBuilder() {
 
           {/* Pinned above the tab bar, so the two things you can do are never under it. */}
           <div
-            className="sticky z-30 -mx-2 flex gap-3 rounded-2xl border border-line-800 bg-deep-950/85 p-2 backdrop-blur-md"
+            className="sticky z-30 -mx-2 flex gap-2 rounded-2xl border border-line-800 bg-deep-950/90 p-2 backdrop-blur-md"
             style={{ bottom: "calc(3.5rem + env(safe-area-inset-bottom) + 8px)" }}
           >
             <button
               type="button"
               onClick={() => setCursor((i) => (i + 1) % candidates.length)}
-              className="flex-1 rounded-xl border border-line-800 bg-deep-900 px-4 py-3 font-semibold text-chalk-300 transition hover:text-chalk-100"
+              className="cut-sm flex-1 border border-line-800 bg-deep-900 px-4 py-3 hed text-[19px] text-chalk-300 transition hover:text-chalk-100"
             >
               Next
             </button>
             <button
               type="button"
               onClick={() => pick(card)}
-              className="flex-[1.6] truncate rounded-xl bg-base-500 px-4 py-3 font-bold text-white shadow-lg shadow-base-500/25 transition hover:bg-base-400"
+              className="cut-sm flex-[1.7] truncate bg-volt px-4 py-3 hed text-[19px] text-deep-950 transition hover:bg-volt-600"
             >
               Pick {card.listing.name}
             </button>
           </div>
 
           <p className="text-center text-[11px] text-chalk-500">
-            {candidates.length} {POSITION_LABEL[needed!].toLowerCase()}
+            Swipe right to pick, left to pass · {candidates.length} {POSITION_LABEL[needed!].toLowerCase()}
             {candidates.length === 1 ? "" : "s"} available · {FORMATION[needed!]} needed
           </p>
         </>
       )}
 
       {complete && (
-        <div className="rounded-2xl border border-line-800 bg-deep-900/60 p-4">
-          <h3 className="text-base font-bold tracking-tight">Your side</h3>
+        <div className="leather cut-sm border border-line-800 p-4">
+          <p className="kicker">Team sheet</p>
+          <h3 className="hed mt-1 text-[30px]">Your side</h3>
 
           <ul className="mt-2 divide-y divide-line-900">
             {filled.map((c, i) => (
@@ -216,25 +229,21 @@ export function SquadBuilder() {
                 <span className="flex items-center gap-2.5">
                   <Jersey ticker={c.listing.ticker} size={30} />
                   <span>
-                    <span className="block text-sm font-semibold leading-tight">{c.listing.name}</span>
+                    <span className="hed block text-[19px]">{c.listing.name}</span>
                     <span className="font-mono text-[11px] text-chalk-500">{c.listing.ticker}</span>
                   </span>
-                  {captain === i && (
-                    <span className="rounded bg-chalk-100 px-1.5 py-0.5 text-[9px] font-bold text-deep-950">
-                      C
-                    </span>
-                  )}
+                  {captain === i && <span className="sticker !text-[11px]">Captain</span>}
                 </span>
-                <span className="tnum text-sm text-chalk-300">
+                <span className="num text-[18px] text-chalk-300">
                   {usd(i === captain ? captainStake : base)}
                 </span>
               </li>
             ))}
           </ul>
 
-          <div className="mt-2 flex items-center justify-between border-t border-line-900 pt-2 text-sm">
-            <span className="text-chalk-500">Total</span>
-            <span className="tnum font-semibold">{usd(totalStake)}</span>
+          <div className="mt-2 flex items-center justify-between border-t border-line-900 pt-2">
+            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-chalk-500">Total</span>
+            <span className="num text-[24px]">{usd(totalStake)}</span>
           </div>
 
           {captain === null ? (
@@ -246,7 +255,7 @@ export function SquadBuilder() {
               type="button"
               onClick={submit}
               disabled={submission.state === "sending"}
-              className="mt-3 w-full rounded-xl bg-base-500 px-4 py-3 font-bold text-white shadow-lg shadow-base-500/25 transition hover:bg-base-400 disabled:opacity-60"
+              className="btn cut-sm mt-3 w-full bg-base-500 px-4 py-3.5 hed text-[20px] text-white transition hover:bg-base-400 disabled:opacity-60"
             >
               {submission.state === "sending" ? "Confirming…" : `Buy the squad · ${usd(totalStake)}`}
             </button>

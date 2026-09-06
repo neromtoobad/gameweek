@@ -20,12 +20,13 @@ type Props = {
 };
 
 /**
- * One draftable stock, as a player card.
+ * One draftable stock, as a trading card.
  *
- * The shirt is the hero, lit from above in the kit's own colour, with the numbers underneath the
- * way a sticker album prints them. Dragging is done with pointer events rather than a gesture
- * library: the deck is the centrepiece of the demo, and a dependency that misbehaves on one phone
- * is not worth the convenience. Buttons do the same job for anyone on a desktop or a keyboard.
+ * Two corners cut, the shirt lit from above in the kit's own colour, the name set tall, and a foil
+ * sheen that slides across the card as it is dragged. Dragging is done with pointer events rather
+ * than a gesture library: the deck is the centrepiece of the demo, and a dependency that
+ * misbehaves on one phone is not worth the convenience. Buttons do the same job for anyone on a
+ * desktop or a keyboard.
  */
 export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, onSkip, depth }: Props) {
   const [dx, setDx] = useState(0);
@@ -82,6 +83,7 @@ export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, on
         opacity: leaving ? 0 : 1,
         zIndex: 10 - depth,
         pointerEvents: isTop ? "auto" : "none",
+        filter: "drop-shadow(0 26px 34px rgba(0,0,0,0.6))",
       }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -89,14 +91,16 @@ export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, on
       onPointerCancel={onPointerUp}
     >
       <div
-        className="kit-card relative overflow-hidden rounded-3xl border shadow-2xl"
+        className="kit-card cut relative overflow-hidden border"
         style={{ ["--kit" as string]: kit.primary }}
       >
+        <span className="foil" style={{ backgroundPositionX: `${50 - dx / 3}%` }} />
+
         {intent && (
           <span
-            className={`absolute top-5 z-10 rounded-lg border-[3px] px-2.5 py-1 text-xl font-black uppercase tracking-widest ${
+            className={`hed absolute top-5 z-10 border-[3px] px-2.5 py-1 text-[26px] tracking-[0.12em] ${
               intent === "draft"
-                ? "left-5 -rotate-12 border-cyan-400 text-cyan-400"
+                ? "left-5 -rotate-12 border-volt text-volt"
                 : "right-5 rotate-12 border-chalk-300 text-chalk-300"
             }`}
             style={{ opacity: stampOpacity }}
@@ -105,49 +109,41 @@ export function SwipeCard({ card, stake, expectedShares, affordable, onDraft, on
           </span>
         )}
 
-        <div className="relative flex flex-col items-center px-5 pb-3.5 pt-4">
+        <div className="relative flex flex-col items-center px-5 pb-3 pt-4">
           <div className="flex w-full items-center justify-between">
-            <span className="rounded-md bg-deep-950/60 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-chalk-300">
-              {POSITION_LABEL[card.position]}
-            </span>
-            {gapBps !== null && (
-              <span
-                className={`tnum rounded-md px-2 py-0.5 text-[11px] font-bold ${
-                  discount ? "bg-up/15 text-up" : gapBps > 0 ? "bg-down/15 text-down" : "bg-deep-800 text-chalk-300"
-                }`}
-              >
-                {discount ? "" : "+"}
-                {(gapBps / 100).toFixed(2)}% vs close
-              </span>
-            )}
+            <span className="sticker">{POSITION_LABEL[card.position]}</span>
+            <span className="font-mono text-[11px] text-chalk-500">{card.listing.ticker}</span>
           </div>
 
-          <div className="my-2" style={{ filter: "drop-shadow(0 18px 24px rgba(0,0,0,0.5))" }}>
-            <Jersey ticker={card.listing.ticker} size={116} />
+          <div className="my-2" style={{ filter: "drop-shadow(0 18px 24px rgba(0,0,0,0.55))" }}>
+            <Jersey ticker={card.listing.ticker} size={118} priority={isTop} />
           </div>
 
-          <h3 className="text-center text-[26px] font-extrabold leading-none tracking-tight">
-            {card.listing.name}
-          </h3>
-          <p className="mt-1.5 font-mono text-xs text-chalk-500">{card.listing.ticker}</p>
+          <h3 className="hed text-center text-[38px]">{card.listing.name}</h3>
         </div>
 
-        <div className="flex items-end justify-between border-t border-line-900 bg-deep-950/40 px-5 py-3.5">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-chalk-500">Price</p>
-            <p className="tnum text-[28px] font-extrabold leading-none tracking-tight">
-              {sharePrice(card.price * 100n)}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-chalk-500">Stake</p>
-            <p className="tnum text-xl font-bold leading-none">{usd(stake)}</p>
-            <p className="tnum mt-1 text-[11px] text-chalk-500">
-              {(Number(expectedShares) / 1e8).toFixed(5)} shares
-            </p>
-          </div>
+        <div className="grid grid-cols-3 divide-x divide-line-800 border-t border-line-800 bg-deep-950/50">
+          <Stat label="Price" value={sharePrice(card.price * 100n)} />
+          <Stat
+            label="vs close"
+            value={gapBps === null ? "—" : `${discount ? "" : "+"}${(gapBps / 100).toFixed(2)}%`}
+            tone={gapBps === null ? undefined : discount ? "up" : gapBps > 0 ? "down" : undefined}
+          />
+          <Stat label="Stake" value={usd(stake)} sub={`${(Number(expectedShares) / 1e8).toFixed(4)} sh`} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function Stat({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: "up" | "down" }) {
+  return (
+    <div className="px-3 py-3 text-center">
+      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-chalk-500">{label}</p>
+      <p className={`num mt-1 text-[22px] ${tone === "up" ? "text-up" : tone === "down" ? "text-down" : ""}`}>
+        {value}
+      </p>
+      {sub && <p className="mt-0.5 text-[10px] text-chalk-500">{sub}</p>}
     </div>
   );
 }

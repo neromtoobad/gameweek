@@ -18,12 +18,12 @@ export type PitchSlot = {
 /**
  * The team sheet.
  *
- * A blue pitch rather than a green one. It is the same shape any fantasy football game draws, and
- * the colour is what makes a screenshot of this one recognisable as this one.
+ * Real grass under floodlights, photographed from above and tilted into perspective the way a
+ * broadcast graphic shows a line-up. Only the ground is tilted: the shirts sit flat on top, so they
+ * stay readable at 52px.
  *
- * Five shirts in a 1-2-2, laid out the way a fantasy football side is: keeper at the back, forwards
- * at the top. Seeing your picks as a formation rather than a list is most of what makes the game
- * feel like a game.
+ * Five shirts in a 1-2-2, keeper at the back, forwards at the top. Seeing your picks as a formation
+ * rather than a list is most of what makes the game feel like a game.
  */
 export function Pitch({
   slots,
@@ -48,32 +48,38 @@ export function Pitch({
   });
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-line-800 shadow-2xl shadow-base-500/10">
-      {/* the pitch: stripes, centre circle, penalty box */}
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          background:
-            "repeating-linear-gradient(180deg, var(--color-turf-900) 0px, var(--color-turf-900) 34px, var(--color-turf-800) 34px, var(--color-turf-800) 68px)",
-        }}
-      />
-      <div aria-hidden className="stadium absolute inset-0" />
-      <svg aria-hidden className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 140">
-        <g stroke="rgba(255,255,255,0.18)" strokeWidth="0.5" fill="none">
-          <rect x="3" y="3" width="94" height="134" />
-          <line x1="3" y1="70" x2="97" y2="70" />
-          <circle cx="50" cy="70" r="13" />
-          <rect x="28" y="112" width="44" height="25" />
-          <rect x="39" y="127" width="22" height="10" />
-          <rect x="28" y="3" width="44" height="25" />
-          <rect x="39" y="3" width="22" height="10" />
-        </g>
-      </svg>
+    <div
+      className="relative overflow-hidden rounded-[22px] border border-line-800 bg-turf-900"
+      style={{ minHeight: height, boxShadow: "0 24px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06)" }}
+    >
+      {/* the ground, in perspective */}
+      <div aria-hidden className="absolute inset-0 overflow-hidden">
+        <div className="grass pitch-3d absolute inset-0">
+          <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 140">
+            <g stroke="rgba(255,255,255,0.55)" strokeWidth="0.55" fill="none">
+              <rect x="4" y="3" width="92" height="134" />
+              <line x1="4" y1="70" x2="96" y2="70" />
+              <circle cx="50" cy="70" r="12" />
+              <rect x="28" y="112" width="44" height="25" />
+              <rect x="39" y="128" width="22" height="9" />
+              <rect x="28" y="3" width="44" height="25" />
+              <rect x="39" y="3" width="22" height="9" />
+            </g>
+          </svg>
+        </div>
+        {/* floodlight glow at the top, dark at the touchlines */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(80% 45% at 50% 0%, rgba(255,255,255,0.14) 0%, transparent 60%), linear-gradient(180deg, rgba(8,8,11,0.25) 0%, transparent 30%, transparent 70%, rgba(8,8,11,0.45) 100%), radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(8,8,11,0.65) 100%)",
+          }}
+        />
+      </div>
 
       <div className="relative flex flex-col justify-between gap-3 px-3 py-4" style={{ minHeight: height }}>
         {rows.map((row) => (
-          <div key={row.position} className="flex items-start justify-center gap-6">
+          <div key={row.position} className="flex items-start justify-center gap-7">
             {row.indices.map((i) => {
               const slot = slots[i];
               const empty = slot.ticker === null;
@@ -85,35 +91,39 @@ export function Pitch({
                   type="button"
                   onClick={onSlotClick ? () => onSlotClick(i) : undefined}
                   disabled={!onSlotClick}
-                  className={`flex w-20 flex-col items-center gap-1 rounded-xl p-1 transition ${
+                  className={`flex w-[84px] flex-col items-center gap-1 rounded-xl p-1 transition ${
                     onSlotClick ? "hover:bg-white/5" : "cursor-default"
-                  } ${waiting ? "slot-waiting ring-1 ring-cyan-400" : ""}`}
+                  } ${waiting ? "slot-waiting ring-1 ring-volt" : ""}`}
                 >
                   {empty ? (
                     <GhostShirt waiting={waiting} />
                   ) : (
-                    <span className="relative">
-                      <Jersey ticker={slot.ticker!} size={52} />
+                    <span className="relative" style={{ filter: "drop-shadow(0 8px 10px rgba(0,0,0,0.55))" }}>
+                      <Jersey ticker={slot.ticker!} size={54} />
                       {slot.isCaptain && (
-                        <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-chalk-100 text-[9px] font-bold text-deep-950">
+                        <span className="hed absolute -right-2 -top-1.5 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-volt text-[11px] text-deep-950">
                           C
                         </span>
                       )}
                     </span>
                   )}
 
-                  <span className="w-full truncate text-center text-[10px] font-semibold text-white/90">
+                  <span
+                    className={`hed w-full truncate rounded-sm px-1.5 py-[3px] text-center text-[11px] tracking-[0.06em] ${
+                      empty ? "text-white/70" : "bg-deep-950/75 text-chalk-100"
+                    }`}
+                  >
                     {empty ? POSITION_LABEL[slot.position] : slot.name ?? slot.ticker}
                   </span>
 
                   {slot.points !== undefined && slot.points !== null && (
                     <span
-                      className={`tnum rounded px-1.5 text-[10px] font-bold ${
+                      className={`num rounded-sm px-1.5 py-[2px] text-[12px] ${
                         slot.points > 0
-                          ? "bg-up/20 text-up"
+                          ? "bg-up text-deep-950"
                           : slot.points < 0
-                            ? "bg-down/20 text-down"
-                            : "bg-white/10 text-white/60"
+                            ? "bg-down text-deep-950"
+                            : "bg-white/15 text-white/80"
                       }`}
                     >
                       {formatPoints(slot.points)}
@@ -132,11 +142,11 @@ export function Pitch({
 /** The outline of a shirt, for a slot nobody has filled yet. */
 function GhostShirt({ waiting }: { waiting: boolean }) {
   return (
-    <svg width={52} height={52} viewBox="0 0 48 48" aria-hidden style={{ display: "block" }}>
+    <svg width={54} height={54} viewBox="0 0 48 48" aria-hidden style={{ display: "block" }}>
       <path
         d="M16 7 L10 10 L5 18 L11 22 L13 19 L13 42 Q24 44 35 42 L35 19 L37 22 L43 18 L38 10 L32 7 Q24 12 16 7 Z"
-        fill={waiting ? "rgba(53,208,255,0.12)" : "rgba(255,255,255,0.05)"}
-        stroke={waiting ? "var(--color-cyan-400)" : "rgba(255,255,255,0.35)"}
+        fill={waiting ? "rgba(215,255,63,0.14)" : "rgba(255,255,255,0.07)"}
+        stroke={waiting ? "var(--color-volt)" : "rgba(255,255,255,0.45)"}
         strokeWidth="1.3"
         strokeDasharray="3 2.4"
         strokeLinejoin="round"
@@ -145,7 +155,7 @@ function GhostShirt({ waiting }: { waiting: boolean }) {
         x="24"
         y="31"
         textAnchor="middle"
-        fill={waiting ? "var(--color-cyan-400)" : "rgba(255,255,255,0.5)"}
+        fill={waiting ? "var(--color-volt)" : "rgba(255,255,255,0.6)"}
         fontSize="16"
         fontWeight="700"
       >

@@ -15,6 +15,7 @@ Gameweek makes people trade tokenized stocks every week:
 - A player fields **five stocks in a 1-2-2**, the way a fantasy football side is picked. Every stock has a position based on how hard it moves: keepers are the steadiest names, forwards the ones that swing. You cannot field five forwards even when momentum says you should, and that constraint is the game.
 - One pick wears the **armband**. The captain's stake is doubled, so their move counts twice. It is a real position size, not a scoring multiplier bolted on, so the chain settles exactly what the table shows.
 - Scores are shown as **points**, ten per percent. A 5.3% day is 53 points, the range a real fantasy gameweek lands in. Points are a presentation of the ratio the contract settles on, never a separate system.
+- The look is a matchday poster: near-black surfaces, one loud colour (volt, #d7ff3f) for the live number and the main action, Base blue kept for the brand and the wallet button. Type is a tall condensed face in caps for names and scores. Cards have two corners cut like a sticker. The pitch is a Higgsfield photograph of floodlit grass tilted into perspective. Decided 2026-09-06 after the user rejected a tidy blue dashboard as boring.
 - Every stock plays in its **own kit**, and no two share a pattern: a sash, hoops, pinstripes, quarters, halves, a chevron, a starfield. At 52px on a crowded pitch colour alone will not separate ten sides, which is the same reason real clubs use patterns. `KIT_PATTERN` in lib/squad.ts names each one.
 - The kits are photographed with **no lettering at all**, so the company's own logo can be printed large across the chest the way a kit carries its sponsor. Generating text and generating a logo were both dead ends; generating a blank patterned shirt is what the model is actually good at.
 - The ten kits were generated with Higgsfield (nano_banana_pro) from one locked prompt template, so they share a lighting setup, camera angle and crop. They live in `app/public/kits/` as trimmed 256px transparent PNGs, about 60KB each, and are served locally: no external image request sits in the demo path. Regenerating one means reusing the template in that file's history and changing only the colours and ticker.
@@ -78,6 +79,8 @@ numbers apologetically.
 | Gas | CDP Paymaster (portal.cdp.coinbase.com) via wallet_sendCalls capability | n/a |
 | Attribution | Builder Code (ERC-8021) from base.dev, dataSuffix capability | n/a |
 | App | Next.js (App Router), React, TypeScript, Tailwind, mobile-first | 16.3.4 / 19.2.8 / 5.9.3 / 4.3.3 |
+| Type | Big Shoulders (display, self-hosted), Manrope (body, self-hosted), Geist Mono | app/app/fonts |
+| Art | Higgsfield nano_banana_pro: 10 kits, stadium hero, grass pitch, trophy, leather | app/public |
 | Chain client | viem, @tanstack/react-query (no wagmi, see below) | 2.56.3 / 5.102.8 |
 | AI | Claude API (@anthropic-ai/sdk), model claude-sonnet-5, server-side only, daily cached | latest |
 | Runtime | Node 25.2.0, bun 1.3.14 | |
@@ -456,6 +459,11 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 - `react-hooks/set-state-in-effect` rejects the usual "set the clock after mount" pattern. Use `useSyncExternalStore` with a cached snapshot and a null server snapshot, which also removes the hydration mismatch.
 - Turbopack walks up past the repo looking for a lockfile and finds one in the home directory. Pin `turbopack.root` in next.config.ts.
 - Configure git identity before the first commit. An AI-attributed commit got a past submission marked down.
+- Tailwind v4 only emits a `@theme` variable when a generated utility uses it. Anything read through `var()` from inline styles, SVG attributes or an `@utility` body silently resolves to nothing. globals.css uses `@theme static`, and a change to that needs a dev-server restart.
+- `next/font/google` could not load the consolidated "Big Shoulders" family (no metrics, no fallback, no font), and nothing warned in the browser: every screen rendered in the system font for a whole review pass. Fonts are self-hosted woff2 files in app/app/fonts via `next/font/local`. Always check `document.fonts` status, not the screenshot, when a font changes.
+- Big Shoulders carries an optical-size axis. Left to `font-optical-sizing: auto`, small text gets the wide text cut and chips truncate. `.hed`, `.num` and `.sticker` pin `"opsz" 72`.
+- Turbopack cannot `fetch(new URL(file, import.meta.url))` in a route handler ("not implemented... yet"). The share cards read the display TTF with `readFile` from `process.cwd()/app/fonts`, and next.config.ts lists that folder in `outputFileTracingIncludes` so Vercel ships it.
+- Running `vercel` from the repo root creates a stray project that serves the whole repo as a static site. Deploy only from app/, in the same shell call as any `cd`.
 
 ## Things NOT to do
 

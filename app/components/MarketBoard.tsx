@@ -44,16 +44,16 @@ export function MarketBoard() {
   return (
     <section id="board" className="rise" style={{ ["--i" as string]: 3 }}>
       <div className="mb-3 flex items-end justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight">The board</h2>
-          <p className="text-xs text-chalk-500">Every stock you can field, priced live.</p>
+        <div className="min-w-0">
+          <p className="kicker whitespace-nowrap">Priced from Chainlink</p>
+          <h2 className="hed mt-1 whitespace-nowrap text-[34px]">The board</h2>
         </div>
         {state && (
-          <span className="flex shrink-0 items-center gap-1.5 text-right text-xs text-chalk-500">
+          <span className="hed flex shrink-0 items-center gap-1.5 whitespace-nowrap pb-1 text-right text-[12px] tracking-[0.1em] text-chalk-500">
             {state.open ? (
               <>
-                <span className="live-dot h-2 w-2 rounded-full bg-up" />
-                <span className="font-semibold text-up">Live</span>
+                <span className="live-dot h-2 w-2 rounded-full bg-volt" />
+                <span className="text-volt">Live</span>
               </>
             ) : (
               <>Friday close · {ago(state.youngest)}</>

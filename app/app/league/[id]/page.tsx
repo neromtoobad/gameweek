@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Wordmark } from "@/components/Wordmark";
 import { LeagueView } from "@/components/LeagueView";
 import { readLeague } from "@/lib/leagues";
 import { APP_URL } from "@/lib/config";
@@ -27,10 +28,11 @@ export default async function LeaguePage({ params }: { params: Promise<{ id: str
   return (
     <main className="flex flex-1 flex-col gap-5 px-4 pb-24 pt-6">
       <header className="flex items-center justify-between">
-        <Link href="/" className="text-sm text-chalk-500 transition hover:text-chalk-300">
-          ← Gameweek
-        </Link>
-        <Link href={`/spectate/${id}`} className="text-xs text-chalk-500 transition hover:text-chalk-300">
+        <Wordmark size={22} />
+        <Link
+          href={`/spectate/${id}`}
+          className="hed rounded-sm border border-line-800 px-2 py-1 text-[11px] tracking-[0.12em] text-chalk-500 transition hover:text-chalk-300"
+        >
           Share view
         </Link>
       </header>

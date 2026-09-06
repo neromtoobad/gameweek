@@ -49,7 +49,7 @@ export function ShareBar({
         href={tweetUrl(text, link)}
         target="_blank"
         rel="noreferrer"
-        className="flex-1 rounded-xl bg-chalk-100 px-4 py-2.5 text-center text-sm font-semibold text-deep-950 transition hover:bg-white"
+        className="btn cut-sm flex-1 bg-chalk-100 px-4 py-2.5 text-center hed text-[17px] text-deep-950 hover:bg-white"
       >
         Post on X
       </a>
@@ -57,14 +57,14 @@ export function ShareBar({
         href={whatsappUrl(text, link)}
         target="_blank"
         rel="noreferrer"
-        className="flex-1 rounded-xl border border-line-800 px-4 py-2.5 text-center text-sm font-semibold text-chalk-300 transition hover:text-chalk-100"
+        className="btn cut-sm flex-1 border border-line-800 bg-deep-900 px-4 py-2.5 text-center hed text-[17px] text-chalk-300 hover:text-chalk-100"
       >
         WhatsApp
       </a>
       <button
         type="button"
         onClick={copy}
-        className="rounded-xl border border-line-800 px-3 py-2.5 text-sm text-chalk-500 transition hover:text-chalk-300"
+        className="cut-sm border border-line-800 bg-deep-900 px-3 py-2.5 hed text-[15px] text-chalk-500 transition hover:text-chalk-300"
       >
         {copied ? "Copied" : "Copy"}
       </button>

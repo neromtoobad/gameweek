@@ -1,44 +1,60 @@
 @import "tailwindcss";
 
 /**
- * Base blue, because the game lives on Base.
+ * Black, with one loud colour.
  *
- * The structure is borrowed from fantasy football: a vivid gradient at the top, then stacked cards
- * that each say what they are in one line. The palette is not: where that game runs purple and lime,
- * this one runs Base blue with a cyan accent, and the pitch is blue rather than green so a
- * screenshot is recognisable as this game and not a clone of another one.
+ * The best fantasy interfaces sit their cards on near-black and let a single hot accent do the
+ * shouting. Here that accent is volt, the colour a boot or a third kit uses, and Base blue is kept
+ * for what it is: the brand and the buttons. The pitch is a photograph of grass under floodlights,
+ * because a game about football should look like it is played on one.
  */
-@theme {
-  /* Base blue and the deep navies it sits on */
+/* `static`, because several of these are read through var() from inline styles, SVG attributes and
+   the utilities below, and Tailwind only emits a theme variable it has seen a class use. */
+@theme static {
+  --color-deep-950: #08080b;
+  --color-deep-900: #101014;
+  --color-deep-800: #18181f;
+  --color-deep-700: #23232c;
+
+  --color-line-900: #1d1d25;
+  --color-line-800: #2c2c37;
+
   --color-base-500: #0052ff;
   --color-base-400: #3b7bff;
   --color-base-600: #0040c8;
 
-  --color-deep-950: #05081c;
-  --color-deep-900: #0a0f2b;
-  --color-deep-800: #111938;
-  --color-deep-700: #1a2447;
+  --color-volt: #d7ff3f;
+  --color-volt-600: #b9e02b;
 
-  --color-line-900: #16203f;
-  --color-line-800: #222f56;
+  --color-turf-900: #0b1a10;
+  --color-turf-800: #10241a;
 
-  /* the pitch */
-  --color-turf-900: #0a1a3f;
-  --color-turf-800: #0d2049;
+  --color-chalk-100: #f6f6f8;
+  --color-chalk-300: #b8b8c6;
+  --color-chalk-500: #7b7b8e;
 
-  --color-cyan-400: #35d0ff;
-  --color-cyan-500: #00b8f0;
+  --color-up: #35e3a0;
+  --color-down: #ff5c7a;
+  --color-flat: #7b7b8e;
 
-  --color-chalk-100: #f4f7ff;
-  --color-chalk-300: #b6c2e4;
-  --color-chalk-500: #7c88ad;
-
-  --color-up: #2ee6a8;
-  --color-down: #ff5f7a;
-  --color-flat: #7c88ad;
-
-  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-big-shoulders), Impact, "Arial Narrow", sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+
+  /* Fluid, so a headline is a headline on a phone and does not become a paragraph on a laptop. */
+  --text-display: clamp(2.8rem, 13vw, 4rem);
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: 0.005em;
+  --text-display--font-weight: 800;
+
+  --text-score: clamp(2.5rem, 10vw, 3.75rem);
+  --text-score--line-height: 0.9;
+  --text-score--letter-spacing: 0;
+  --text-score--font-weight: 900;
+
+  /* one easing language for the whole product */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 html {
@@ -50,9 +66,22 @@ html {
 body {
   background: var(--color-deep-950);
   color: var(--color-chalk-100);
+  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   min-height: 100dvh;
   /* Nothing on a phone should ever scroll sideways. */
   overflow-x: hidden;
+}
+
+/* Film grain over everything, so flat black reads as a surface rather than a void. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
 }
 
 /* Numbers in tables and leaderboards must line up column to column. */
@@ -61,51 +90,154 @@ body {
   font-feature-settings: "tnum";
 }
 
-/**
- * The hero wash.
- *
- * Fantasy football uses a mesh gradient to make the top of the page feel like an event rather than
- * a form. This is the same trick in Base's colours.
+/* ------------------------------------------------------------------ type
+ * Headlines and scores are set in a tall condensed face, upper case, the way a stadium screen or a
+ * sticker album sets a name. Body copy stays in a quiet sans so the loud bits stay loud.
  */
-.hero-wash {
+/* The face carries an optical-size axis, and left to itself a browser picks the wide text cut for
+   anything small, which is exactly where the condensed cut is wanted. Pin the display cut. */
+@utility hed {
+  font-family: var(--font-big-shoulders), Impact, "Arial Narrow", sans-serif;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" 72;
+  text-transform: uppercase;
+  line-height: 0.92;
+  letter-spacing: 0.02em;
+  font-weight: 800;
+}
+
+@utility num {
+  font-family: var(--font-big-shoulders), Impact, "Arial Narrow", sans-serif;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" 72;
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Small upper-case label with a volt tick in front, used to introduce every section. */
+@utility kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-volt);
+}
+
+.kicker::before {
+  content: "";
+  width: 14px;
+  height: 3px;
+  background: var(--color-volt);
+  transform: skewX(-20deg);
+}
+
+/* ------------------------------------------------------------------ surfaces */
+
+/* The stadium at night behind the front page. The photograph is faded into black at the bottom
+   so the copy sits on solid ground. */
+.stadium-hero {
   background:
-    radial-gradient(115% 85% at 8% -10%, rgba(0, 82, 255, 0.95) 0%, rgba(0, 82, 255, 0.35) 38%, transparent 66%),
-    radial-gradient(95% 75% at 102% 4%, rgba(53, 208, 255, 0.62) 0%, transparent 52%),
-    radial-gradient(105% 85% at 72% 112%, rgba(124, 77, 255, 0.62) 0%, transparent 60%),
-    linear-gradient(160deg, var(--color-deep-800) 0%, var(--color-deep-950) 100%);
+    linear-gradient(180deg, rgba(8, 8, 11, 0.1) 0%, rgba(8, 8, 11, 0.45) 45%, rgba(8, 8, 11, 0.92) 78%, var(--color-deep-950) 100%),
+    url("/stadium.jpg") center 30% / cover no-repeat,
+    var(--color-deep-900);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    transition-duration: 0.001ms !important;
-  }
+/* The same stadium, quieter, behind a league header. */
+.arena {
+  background:
+    linear-gradient(180deg, rgba(8, 8, 11, 0.55) 0%, rgba(8, 8, 11, 0.85) 60%, var(--color-deep-950) 100%),
+    url("/stadium.jpg") center 20% / cover no-repeat,
+    var(--color-deep-900);
 }
 
-/* ------------------------------------------------------------------ type scale
- * Fluid, so a headline is a headline on a phone and does not become a paragraph on a laptop.
- */
-@theme {
-  --text-display: clamp(2rem, 6.5vw, 2.75rem);
-  --text-display--line-height: 1.05;
-  --text-display--letter-spacing: -0.03em;
-  --text-display--font-weight: 800;
+/* Pebbled black leather, faint, for the surfaces that hold numbers. Flat black reads as a void;
+   a surface with grain reads as an object. */
+.leather {
+  background:
+    linear-gradient(rgba(16, 16, 20, 0.86), rgba(16, 16, 20, 0.86)),
+    url("/leather.jpg") center / 320px repeat,
+    var(--color-deep-900);
+}
 
-  --text-score: clamp(2.25rem, 9vw, 3.5rem);
-  --text-score--line-height: 1;
-  --text-score--letter-spacing: -0.04em;
-  --text-score--font-weight: 800;
+/* Real grass under floodlights. */
+.grass {
+  background: url("/grass.jpg") center / cover no-repeat, var(--color-turf-900);
+}
 
-  /* one easing language for the whole product */
-  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+/* The pitch drawn in perspective, the way a broadcast graphic shows a line-up. Only the ground is
+   tilted; the shirts sit flat on top so they stay readable. */
+.pitch-3d {
+  transform: perspective(640px) rotateX(24deg) scale(1.28, 1.16);
+  transform-origin: 50% 90%;
+}
+
+/* A shirt card's brand tint, set per tile from its kit colour. */
+.kit-tile {
+  background:
+    linear-gradient(160deg, color-mix(in oklab, var(--kit) 40%, transparent) 0%, transparent 60%),
+    var(--color-deep-900);
+  border-color: color-mix(in oklab, var(--kit) 45%, var(--color-line-800));
+}
+
+/* The player card in the draft deck: the same tint, thrown from the top like a spotlight. */
+.kit-card {
+  background:
+    radial-gradient(100% 70% at 50% 0%, color-mix(in oklab, var(--kit) 52%, transparent) 0%, transparent 72%),
+    linear-gradient(180deg, var(--color-deep-800) 0%, var(--color-deep-900) 100%);
+  border-color: color-mix(in oklab, var(--kit) 45%, var(--color-line-800));
+}
+
+/* Two corners cut, like a trading card. Shadows are clipped too, so wrap it in a drop-shadow. */
+.cut {
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+}
+
+.cut-sm {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+
+/* A foil sheen that slides across a card as it is dragged. Position is driven inline. */
+.foil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.14) 45%,
+    rgba(215, 255, 63, 0.22) 50%,
+    rgba(255, 255, 255, 0.12) 55%,
+    transparent 65%
+  );
+  background-size: 250% 100%;
+  mix-blend-mode: screen;
+}
+
+/* A sticker chip: volt, skewed, upper case. */
+@utility sticker {
+  display: inline-block;
+  padding: 3px 8px 2px;
+  background: var(--color-volt);
+  color: var(--color-deep-950);
+  font-family: var(--font-big-shoulders), Impact, "Arial Narrow", sans-serif;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" 72;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: skewX(-8deg);
+  line-height: 1.1;
 }
 
 /* ------------------------------------------------------------------ interaction rules
- * From the interaction-detail checklist: focus rings as box-shadow so they follow the radius, no
- * iOS tap highlight, hover only where hover exists, press feedback proportional and fast.
+ * Focus rings as box-shadow so they follow the radius, no iOS tap highlight, hover only where hover
+ * exists, press feedback proportional and fast.
  */
 * {
   -webkit-tap-highlight-color: transparent;
@@ -115,7 +247,7 @@ body {
   outline: none;
   box-shadow:
     0 0 0 2px var(--color-deep-950),
-    0 0 0 4px var(--color-cyan-400);
+    0 0 0 4px var(--color-volt);
 }
 
 button,
@@ -139,9 +271,7 @@ a.btn:active {
   }
 }
 
-/* ------------------------------------------------------------------ entrance
- * Sections rise in with a small stagger. Fast enough to feel like a settle, not a show.
- */
+/* ------------------------------------------------------------------ motion */
 @keyframes rise {
   from {
     opacity: 0;
@@ -161,10 +291,10 @@ a.btn:active {
 @keyframes pulse-dot {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(46, 230, 168, 0.55);
+    box-shadow: 0 0 0 0 rgba(215, 255, 63, 0.55);
   }
   60% {
-    box-shadow: 0 0 0 7px rgba(46, 230, 168, 0);
+    box-shadow: 0 0 0 7px rgba(215, 255, 63, 0);
   }
 }
 
@@ -172,37 +302,14 @@ a.btn:active {
   animation: pulse-dot 1.8s ease-out infinite;
 }
 
-/* The pitch at night: a soft glow from the floodlights and a vignette at the edges. */
-.stadium {
-  background:
-    radial-gradient(90% 60% at 50% 0%, rgba(53, 208, 255, 0.16) 0%, transparent 60%),
-    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(5, 8, 28, 0.55) 100%);
-}
-
-/* A shirt card's brand tint, set per tile from its kit colour. */
-.kit-tile {
-  background:
-    linear-gradient(160deg, color-mix(in oklab, var(--kit) 38%, transparent) 0%, transparent 58%),
-    var(--color-deep-900);
-  border-color: color-mix(in oklab, var(--kit) 45%, var(--color-line-800));
-}
-
-/* The player card in the draft deck: the same tint, thrown from the top like a spotlight. */
-.kit-card {
-  background:
-    radial-gradient(100% 70% at 50% 0%, color-mix(in oklab, var(--kit) 48%, transparent) 0%, transparent 72%),
-    linear-gradient(180deg, var(--color-deep-800) 0%, var(--color-deep-900) 100%);
-  border-color: color-mix(in oklab, var(--kit) 45%, var(--color-line-800));
-}
-
 /* An empty slot that is waiting for its pick breathes, so the eye knows where the next shirt goes. */
 @keyframes slot-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(53, 208, 255, 0.55);
+    box-shadow: 0 0 0 0 rgba(215, 255, 63, 0.5);
   }
   60% {
-    box-shadow: 0 0 0 8px rgba(53, 208, 255, 0);
+    box-shadow: 0 0 0 8px rgba(215, 255, 63, 0);
   }
 }
 
@@ -210,12 +317,33 @@ a.btn:active {
   animation: slot-pulse 1.6s ease-out infinite;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .rise {
-    animation: none;
+/* The ticker tape along the top of the front page. Content is duplicated so the loop is seamless. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
   }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+  .rise,
   .live-dot,
-  .slot-waiting {
+  .slot-waiting,
+  .marquee {
     animation: none;
   }
 }

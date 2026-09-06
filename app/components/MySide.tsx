@@ -24,12 +24,15 @@ export function MySide({
   wallet,
   scoreBps,
   heading = "Your side",
+  player,
   onBack,
 }: {
   wallet: `0x${string}`;
   /** The player's league score, once the round has locked. */
   scoreBps: number | null;
   heading?: string;
+  /** Shown beside the kicker when the side belongs to somebody else. */
+  player?: string;
   /** Present when looking at somebody else's side. */
   onBack?: () => void;
 }) {
@@ -42,7 +45,7 @@ export function MySide({
   });
 
   if (side.isPending) {
-    return <div className="h-[360px] animate-pulse rounded-3xl border border-line-800 bg-deep-900/60" />;
+    return <div className="h-[360px] animate-pulse rounded-3xl border border-line-800 bg-deep-900" />;
   }
 
   const holdings = side.data?.holdings ?? [];
@@ -64,7 +67,7 @@ export function MySide({
         ) : (
           <Link
             href="/draft"
-            className="mt-3 inline-block rounded-xl bg-base-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-base-400"
+            className="btn cut-sm mt-3 inline-block bg-volt px-4 py-2.5 hed text-[18px] text-deep-950 transition hover:bg-volt-600"
           >
             Pick your side
           </Link>
@@ -98,46 +101,46 @@ export function MySide({
 
   return (
     <section className="flex flex-col gap-3">
-      <div className="flex items-baseline justify-between">
-        <h2 className="flex items-center gap-2 text-base font-bold tracking-tight">
-          {heading}
-          {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              className="text-[11px] font-normal normal-case text-chalk-500 transition hover:text-chalk-300"
-            >
-              back to yours
-            </button>
-          )}
-        </h2>
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="kicker">
+            Team sheet
+            {player && <span className="font-mono normal-case tracking-normal text-chalk-300">{player}</span>}
+          </p>
+          <h2 className="hed mt-1 flex items-baseline gap-2 text-[30px]">
+            {heading}
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="font-sans text-[11px] font-semibold normal-case tracking-normal text-chalk-500 transition hover:text-chalk-300"
+              >
+                back to yours
+              </button>
+            )}
+          </h2>
+        </div>
         <span className="text-right">
           {teamPoints === null ? (
             <span className="text-xs text-chalk-500">scores once the round locks</span>
           ) : (
-            <>
-              <span
-                className={`tnum text-xl font-bold ${
-                  teamPoints > 0 ? "text-up" : teamPoints < 0 ? "text-down" : "text-flat"
-                }`}
-              >
-                {formatPoints(teamPoints)}
-              </span>
-              <span className="ml-1 text-[10px] text-chalk-500">pts</span>
-            </>
+            <span className={`num text-[40px] ${teamPoints > 0 ? "text-up" : teamPoints < 0 ? "text-down" : "text-flat"}`}>
+              {formatPoints(teamPoints)}
+              <span className="ml-1 font-sans text-[10px] font-bold uppercase tracking-wider text-chalk-500">pts</span>
+            </span>
           )}
         </span>
       </div>
 
       <Pitch slots={slots} />
 
-      <div className="flex items-center justify-between rounded-xl border border-line-800 bg-deep-900/60 px-4 py-2.5 text-sm">
-        <span className="text-chalk-500">Squad value</span>
-        <span className="tnum font-semibold">{usd(side.data!.nav)}</span>
+      <div className="flex items-center justify-between rounded-xl border border-line-800 bg-deep-900 px-4 py-2.5">
+        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-chalk-500">Squad value</span>
+        <span className="num text-[22px]">{usd(side.data!.nav)}</span>
       </div>
 
       {bench.length > 0 && (
-        <div className="rounded-xl border border-line-800 bg-deep-900/60 px-4 py-2.5">
+        <div className="rounded-xl border border-line-800 bg-deep-900 px-4 py-2.5">
           <p className="text-xs uppercase tracking-wide text-chalk-500">Also held</p>
           <ul className="mt-1 space-y-1">
             {bench.map((h) => (

@@ -1,13 +1,29 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { Providers } from "@/components/Providers";
 import { MiniAppReady } from "@/components/MiniAppReady";
 import { TabBar } from "@/components/TabBar";
 import { APP_URL, BASE_APP_ID } from "@/lib/config";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+// A tall condensed face for names and scores, a quiet sans for everything else, and a mono for
+// tickers and addresses. The condensed face is what makes a number look like a scoreline. Both are
+// served from this repo rather than fetched from Google at build time, so a demo never waits on a
+// font host and a build never fails because one was unreachable.
+const display = localFont({
+  src: "./fonts/BigShoulders.woff2",
+  variable: "--font-big-shoulders",
+  weight: "100 900",
+  display: "swap",
+});
+const sans = localFont({
+  src: "./fonts/Manrope.woff2",
+  variable: "--font-manrope",
+  weight: "200 800",
+  display: "swap",
+});
+const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Gameweek",
@@ -30,7 +46,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#06110c",
+  themeColor: "#08080b",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -39,7 +55,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${display.variable} ${sans.variable} ${mono.variable} antialiased`}>
         <Providers>
           <MiniAppReady />
           <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">{children}</div>

@@ -7,7 +7,8 @@ import { useCountUp } from "@/lib/useCountUp";
 import type { Standing } from "@/lib/leagues";
 import { Jersey } from "./Jersey";
 
-const MEDALS = ["🥇", "🥈", "🥉"];
+/** Gold, silver, bronze, for the three places the pot pays. */
+const PODIUM = ["bg-[#e9c64a] text-deep-950", "bg-[#cfd3dc] text-deep-950", "bg-[#c98d5e] text-deep-950"];
 
 /**
  * The league table.
@@ -40,7 +41,7 @@ export function Leaderboard({
   }
 
   return (
-    <ul className="divide-y divide-line-900 overflow-hidden rounded-2xl border border-line-800 bg-deep-900/60">
+    <ul className="leather divide-y divide-line-900 overflow-hidden rounded-2xl border border-line-800">
       {standings.map((s, i) => {
         const isYou = you && s.member.toLowerCase() === you.toLowerCase();
         const isSelected = selected && s.member.toLowerCase() === selected.toLowerCase();
@@ -52,27 +53,23 @@ export function Leaderboard({
         const row = (
           <>
             <span
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-extrabold ${
+              className={`num flex h-10 w-9 shrink-0 items-center justify-center rounded-md text-[22px] ${
                 showPayout && s.rank <= 3
-                  ? "bg-base-500 text-white"
+                  ? PODIUM[s.rank - 1]
                   : leader
-                    ? "bg-cyan-400 text-deep-950"
+                    ? "bg-volt text-deep-950"
                     : "bg-deep-800 text-chalk-300"
               }`}
             >
-              {showPayout && s.rank <= 3 ? MEDALS[s.rank - 1] : s.rank}
+              {s.rank}
             </span>
 
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-2">
-                <span className="truncate font-mono text-sm">{shortAddress(s.member)}</span>
-                {isYou && (
-                  <span className="rounded bg-cyan-400/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-cyan-400">
-                    you
-                  </span>
-                )}
+                <span className="truncate font-mono text-[13px]">{shortAddress(s.member)}</span>
+                {isYou && <span className="sticker !text-[11px]">you</span>}
                 {isBot && (
-                  <span className="rounded bg-chalk-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-chalk-300">
+                  <span className="hed rounded-sm bg-chalk-500/20 px-1.5 py-0.5 text-[11px] tracking-[0.08em] text-chalk-300">
                     bot
                   </span>
                 )}
@@ -94,19 +91,19 @@ export function Leaderboard({
             </div>
 
             <div className="shrink-0 text-right">
-              <p className={`tnum text-2xl font-extrabold leading-none tracking-tight ${tone}`}>
+              <p className={`num text-[34px] ${tone}`}>
                 {s.scoreBps === null ? "—" : <Points value={pointsFromScore(s.scoreBps)} />}
-                <span className="ml-1 text-[10px] font-semibold text-chalk-500">pts</span>
+                <span className="ml-1 font-sans text-[10px] font-bold uppercase tracking-wider text-chalk-500">pts</span>
               </p>
-              <p className="tnum mt-1 text-[11px] text-chalk-500">
+              <p className="tnum mt-0.5 text-[11px] text-chalk-500">
                 {delta === null ? usd(s.navNow) : `${delta > 0 ? "+" : ""}${delta.toFixed(2)}% · ${usd(s.navNow)}`}
               </p>
             </div>
           </>
         );
 
-        const className = `rise flex w-full items-center gap-3 px-4 py-3 text-left ${
-          isYou ? "bg-base-500/10" : ""
+        const className = `rise flex w-full items-center gap-3 px-3.5 py-3 text-left ${
+          isYou ? "bg-volt/[0.07]" : ""
         } ${isSelected ? "bg-deep-800" : ""}`;
 
         return (

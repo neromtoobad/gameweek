@@ -22,7 +22,7 @@ export function TabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line-800 bg-deep-950/85 backdrop-blur-md"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line-800 bg-deep-950/90 backdrop-blur-md"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="mx-auto flex max-w-md">
@@ -36,10 +36,11 @@ export function TabBar() {
               key={href}
               href={href}
               aria-current={active ? "page" : undefined}
-              className={`flex h-14 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold ${
-                active ? "text-cyan-400" : "text-chalk-500 hover:text-chalk-300"
+              className={`relative flex h-14 flex-1 flex-col items-center justify-center gap-1 hed text-[12px] tracking-[0.1em] ${
+                active ? "text-volt" : "text-chalk-500 hover:text-chalk-300"
               }`}
             >
+              {active && <span className="absolute inset-x-6 top-0 h-[3px] bg-volt" />}
               <Icon active={active} />
               {label}
             </Link>

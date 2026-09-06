@@ -1,19 +1,25 @@
-import { Logo } from "@/components/Logo";
 import { AccountBar } from "@/components/AccountBar";
 import { MarketBoard } from "@/components/MarketBoard";
 import { Hero } from "@/components/Hero";
 import { LeagueList } from "@/components/LeagueList";
+import { Marquee } from "@/components/Marquee";
+import { Wordmark } from "@/components/Wordmark";
 
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col gap-6 px-4 pb-24 pt-5">
-      <header className="flex items-center gap-2.5">
-        <Logo size={26} />
-        <span className="text-lg font-bold tracking-tight">Gameweek</span>
+    <main className="flex flex-1 flex-col gap-6 px-4 pb-24 pt-4">
+      <header className="flex items-center justify-between">
+        <Wordmark size={26} />
+        <span className="hed rounded-sm border border-line-800 px-2 py-1 text-[11px] tracking-[0.12em] text-chalk-500">
+          on Base
+        </span>
       </header>
 
-      <Hero />
+      <div className="-mx-4 -mt-2">
+        <Marquee />
+      </div>
 
+      <Hero />
 
       <div className="rise" style={{ ["--i" as string]: 1 }}>
         <AccountBar />
