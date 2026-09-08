@@ -84,7 +84,7 @@ numbers apologetically.
 | Chain client | viem, @tanstack/react-query (no wagmi, see below) | 2.56.3 / 5.102.8 |
 | AI | Claude API (@anthropic-ai/sdk), model claude-sonnet-5, server-side only, daily cached | latest |
 | Runtime | Node 25.2.0, bun 1.3.14 | |
-| Hosting | Vercel | |
+| Hosting | Vercel, building from GitHub on push to main | |
 
 Stack decisions taken during Phase 2:
 - **wagmi dropped.** Sub Accounts and Spend Permissions are Base Account SDK APIs, and wagmi would only wrap the same EIP-1193 provider. The app uses `@base-org/account` for writes and a viem public client for reads.
@@ -464,6 +464,7 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 - Some networks block api.developer.coinbase.com entirely: DNS times out and TCP to its IPs times out, while mainnet.base.org works. Seen 2026-09-08 on a Nigerian mobile hotspot. The read client now uses viem `fallback` over the CDP node, mainnet.base.org and publicnode, so the board still fills, about 20s slower. The Base Account SDK's own calls are unaffected by our transport.
 - Vercel env vars added as "sensitive" cannot be pulled back to compare. `vercel env add NAME production --force` with the value on stdin overwrites without printing it.
 - Running `vercel` from the repo root creates a stray project that serves the whole repo as a static site. Deploy only from app/, in the same shell call as any `cd`.
+- The Vercel project builds from GitHub now: a push to `main` deploys to https://gameweek-bay.vercel.app on its own. The repo root holds no package.json, so the project's Root Directory has to stay `app`; a git build with it set to `.` fails immediately. It is a project setting, not something vercel.json can carry.
 
 ## Things NOT to do
 
