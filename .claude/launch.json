@@ -3,9 +3,9 @@
   "configurations": [
     {
       "name": "gameweek",
-      "runtimeExecutable": "bun",
+      "runtimeExecutable": "/usr/local/bin/node",
       "runtimeArgs": [
-        "run",
+        "node_modules/next/dist/bin/next",
         "dev"
       ],
       "cwd": "app",

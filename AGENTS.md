@@ -203,11 +203,7 @@ Tests (contracts/test/)
 
 ```
 base/
-  CLAUDE.md                  this file (rename to AGENTS.md before submission, never commit as CLAUDE.md)
-  IDEAS.md                   research and idea stress test (delete before submission)
-  HACKATHON_WORKFLOW.md      process doc (delete before submission)
-  PHASE_0_CHECKLIST.md       pre-build prep (delete before submission)
-  BUILD_GUIDE.md             day-by-day steps (delete before submission)
+  AGENTS.md                  this file, the project brain. Read it first every session.
   README.md                  product page: pitch, architecture, live tx links, AI tools used
   contracts/                 Foundry project
     src/Gameweek.sol
@@ -262,13 +258,13 @@ Phase 1 — Contract
 - [x] 1.1 DONE. Foundry project at contracts/, OpenZeppelin v5.1.0, IAggregatorV3 interface, config/tokens.json.
 - [x] 1.2 DONE. Gameweek.sol written per spec.
 - [x] 1.3 DONE. 38 unit tests and 6 fork tests green. Gas at 50 members: lock 1.72M, settle 578K.
-- [ ] 1.4 Deploy. Fully scripted: `cd contracts && BASE_RPC_URL=... ./script/deploy-all.sh` preflights, deploys both contracts, verifies them, registers the 10 tradeable tickers in one call, writes app/.env.local and reads the result back. The only missing input is a funded keystore account. Record here: `GAMEWEEK=` `ROUTER=`
+- [x] 1.4 DONE 2026-09-06 17:22 UTC, block 50962993. `GAMEWEEK=0x91c0110852a7abd96e18a928e38d25ee8f384888` `ROUTER=0x129e71616c4ad2a1f38c87502f7800ddbfdb1fdc`, deployer 0xE8B04B60CbD9764794D9659818a13035A70ae04e, 10 tokens registered, no league created yet. Was scripted: `cd contracts && BASE_RPC_URL=... ./script/deploy-all.sh` preflights, deploys both contracts, verifies them, registers the 10 tradeable tickers in one call, writes app/.env.local and reads the result back. The only missing input is a funded keystore account. Record here: `GAMEWEEK=` `ROUTER=`
 - [ ] 1.5 Create league #1 with a 7-day staleness tolerance (demo league) and league #2 with real Friday times.
 
 Phase 2 — App shell
 - [x] 2.1 DONE. Next.js 16 app at app/, Tailwind 4 theme, mobile-first shell, react-query provider, Base Account SDK wired with sub accounts on-connect.
 - [x] 2.2 DONE. Connect flow resolves universal + sub account, league wallet card shows NAV split into cash and stocks, live board reads all 13 Chainlink feeds and labels market-closed and zero-supply listings.
-- [ ] 2.3 Deploy to Vercel and confirm the connect popup works on a real phone. Needs a Vercel login. The passkey flow cannot be exercised headlessly.
+- [x] 2.3 DONE 2026-09-08. Live at https://gameweek-bay.vercel.app (project `gameweek`, scope moren808s-projects, deploy with `npx vercel deploy --prod --yes` from app/). All routes 200, board and draft verified in a browser. The connect popup on a real phone is still untested.
 
 Phase 3 — Trading
 - [x] 3.1 DONE, differently. 0x is not used. GameweekRouter.sol swaps directly against the Slipstream pool and takes the 50 bps pot fee in the same call, so no API key and no HTTP hop sits in the demo's critical path. 17 tests including a fuzz run.
@@ -301,7 +297,7 @@ Phase 5 — Ritual (only after Phase 4 is demoable end to end)
 Phase 6 — Submission
 - [ ] 6.1 README as product page with real tx hashes and Basescan links.
 - [ ] 6.2 Cleanup: no console.log, no TODOs, .gitignore covers .env*, keystores, out/, broadcast/ secrets.
-- [ ] 6.3 Rename CLAUDE.md -> AGENTS.md. Delete IDEAS.md, HACKATHON_WORKFLOW.md, PHASE_0_CHECKLIST.md, BUILD_GUIDE.md.
+- [x] 6.3 DONE 2026-09-08. Renamed to AGENTS.md, the three process docs deleted, repo pushed public.
 - [ ] 6.4 4 slides, sub-3-minute video, submit.
 
 ## Deadline and schedule
@@ -455,7 +451,7 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 - Do not spend an RPC call on something address ordering already tells you. A pool's token0 is just the lower address, so USDC (0x83...) is always token0 against a B20 (0xb2...).
 - forge-std has no `.length` JSON path and no `[*]` projection, but `.listings[0].ticker` works.
 - Next.js dev analytics fails in a sandboxed browser and puts a red issue badge on the dev overlay. `NEXT_TELEMETRY_DISABLED=1` keeps a judge's console clean.
-- `next dev` writes its own app/AGENTS.md and app/CLAUDE.md. They are regenerated on every run, so commit them rather than fighting them. They are unrelated to this file.
+- `next dev` writes its own app/AGENTS.md and app/CLAUDE.md, which are NOT this file. They are regenerated on every run, so commit them rather than fighting them. They are unrelated to this file.
 - `react-hooks/set-state-in-effect` rejects the usual "set the clock after mount" pattern. Use `useSyncExternalStore` with a cached snapshot and a null server snapshot, which also removes the hydration mismatch.
 - Turbopack walks up past the repo looking for a lockfile and finds one in the home directory. Pin `turbopack.root` in next.config.ts.
 - Configure git identity before the first commit. An AI-attributed commit got a past submission marked down.
@@ -463,6 +459,10 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 - `next/font/google` could not load the consolidated "Big Shoulders" family (no metrics, no fallback, no font), and nothing warned in the browser: every screen rendered in the system font for a whole review pass. Fonts are self-hosted woff2 files in app/app/fonts via `next/font/local`. Always check `document.fonts` status, not the screenshot, when a font changes.
 - Big Shoulders carries an optical-size axis. Left to `font-optical-sizing: auto`, small text gets the wide text cut and chips truncate. `.hed`, `.num` and `.sticker` pin `"opsz" 72`.
 - Turbopack cannot `fetch(new URL(file, import.meta.url))` in a route handler ("not implemented... yet"). The share cards read the display TTF with `readFile` from `process.cwd()/app/fonts`, and next.config.ts lists that folder in `outputFileTracingIncludes` so Vercel ships it.
+- node_modules was installed on an Apple Silicon Mac. On an Intel Mac every native package (Next SWC, lightningcss, Tailwind oxide, sharp, unrs-resolver) is missing its x64 build and Next dies trying to fetch SWC through yarn. Fetch the `*-darwin-x64` twins with `npm pack` and symlink them into node_modules; bun and forge are not installed on that machine either, so .claude/launch.json runs Next through /usr/local/bin/node directly.
+- The external drive filled to zero bytes. Turbopack cannot write its cache and `cp` fails mid-file. Delete app/.next (regenerable) and keep big things on the internal disk.
+- Some networks block api.developer.coinbase.com entirely: DNS times out and TCP to its IPs times out, while mainnet.base.org works. Seen 2026-09-08 on a Nigerian mobile hotspot. The read client now uses viem `fallback` over the CDP node, mainnet.base.org and publicnode, so the board still fills, about 20s slower. The Base Account SDK's own calls are unaffected by our transport.
+- Vercel env vars added as "sensitive" cannot be pulled back to compare. `vercel env add NAME production --force` with the value on stdin overwrites without printing it.
 - Running `vercel` from the repo root creates a stray project that serves the whole repo as a static site. Deploy only from app/, in the same shell call as any `cd`.
 
 ## Things NOT to do
@@ -477,7 +477,7 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 - No Farcaster mini app, MiniKit, manifest, or Base App preview work. Web app only. Revisit after submission if judges ask.
 - No building an AMM, a lending market, or an index product. Glider, Aave and Aerodrome exist.
 - No fake "submitted" screens. Every action a judge sees is a mainnet transaction with a hash.
-- No committing CLAUDE.md, .env files, keystores, or the treasury key.
+- No committing .env files, keystores, or the treasury key. The repo is public: check `git ls-files` before every push.
 - No console.log, TODO, or commented-out code at submission.
 - No Claude API call anywhere, including the bot. A side that depends on an HTTP request is a side that fails to get picked the one evening the API is slow, and "the model liked it" is not a strategy anyone can check. Sunday Bot ranks on the weekend gap, which is readable from the chain and explainable in a sentence.
 - No bot wallet balance above $1. Its key lives in the environment rather than a keystore, deliberately, because it signs unattended on a schedule; that is safe only while the wallet holds nothing that matters.
@@ -488,5 +488,5 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 
 ## Status
 
-Phase: 4 mostly done. Contract complete (44 tests green, not yet deployed). Draft loop and league loop both built and verified in a browser. Leaderboard, join, lock, settle and a read-only spectator view all work against a local chain seeded by ./script/local-dev.sh. GameweekRouter written and tested but not deployed. Next action: deploy Gameweek and GameweekRouter to Base mainnet, which needs a funded deployer key from PHASE_0_CHECKLIST.md, then a $2 live swap to prove the loop end to end. No 0x key is needed any more.
-Deadline: Thu 10 Sep 03:59 UTC. Contract address: not deployed. Builder Code: not registered.
+Phase: 4 mostly done. Contracts deployed to Base mainnet 2026-09-06 and the app is live on Vercel 2026-09-08 (see 1.4 and 2.3). No league has been created and no real draft has happened; that is the whole remaining gap. Draft loop and league loop both built and verified in a browser. Leaderboard, join, lock, settle and a read-only spectator view all work against a local chain seeded by ./script/local-dev.sh. GameweekRouter written and tested but not deployed. Next action: open a round before 21:00 UTC and draft one real side, which needs a machine with Foundry and the deployer keystore. The whole lifecycle (create, join, lock, settle) was proven 2026-09-08 by multi-block simulation against live mainnet state, and a 0.25 USDC swap through the router simulates to 0.001101 NVDAc at $225.98 against a Chainlink close of $225.91. No 0x key is needed any more.
+Deadline: Thu 10 Sep 03:59 UTC. Gameweek 0x91c0110852a7abd96e18a928e38d25ee8f384888, Router 0x129e71616c4ad2a1f38c87502f7800ddbfdb1fdc. Builder Code: not registered.

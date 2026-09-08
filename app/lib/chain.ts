@@ -1,13 +1,24 @@
-import { createPublicClient, http, defineChain } from "viem";
+import { createPublicClient, fallback, http, defineChain } from "viem";
 import { base } from "viem/chains";
-import { RPC_URL } from "./config";
+import { RPC_FALLBACKS, RPC_URL } from "./config";
 
 export const baseChain = defineChain({ ...base, rpcUrls: { default: { http: [RPC_URL] } } });
 
-/** Read-only client. Every price and balance on the shell comes through here, no API key needed. */
+const rpcUrls = [RPC_URL, ...RPC_FALLBACKS.filter((url) => url !== RPC_URL)];
+
+/**
+ * Read-only client. Every price and balance on the shell comes through here, no API key needed.
+ *
+ * The dedicated node is tried first. If it cannot be reached the same request goes to a public
+ * node instead, and viem keeps ranking the transports by latency and success so a host that is
+ * blocked on this network stops being asked first.
+ */
 export const publicClient = createPublicClient({
   chain: baseChain,
-  transport: http(RPC_URL, { batch: true }),
+  transport: fallback(
+    rpcUrls.map((url) => http(url, { batch: true, timeout: 6_000, retryCount: 0 })),
+    { rank: true },
+  ),
 });
 
 type MulticallEntry = { address: `0x${string}`; abi: readonly unknown[]; functionName: string; args?: readonly unknown[] };

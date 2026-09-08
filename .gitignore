@@ -22,3 +22,7 @@ contracts/lib/
 
 # os
 .DS_Store
+
+# macOS AppleDouble sidecars, created by exFAT volumes
+._*
+.DS_Store

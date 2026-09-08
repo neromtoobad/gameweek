@@ -7,6 +7,15 @@ export const USDC_DECIMALS = 6;
 /** Public RPC is fine for reads. Set NEXT_PUBLIC_RPC_URL to a dedicated node before the demo. */
 export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://mainnet.base.org";
 
+/**
+ * Public nodes the read client falls through to when the dedicated one cannot be reached.
+ *
+ * Some networks block the Coinbase developer domain outright (seen 2026-09-08 on a Nigerian
+ * mobile carrier: DNS and TCP both time out), and a board that goes blank because one host is
+ * unreachable is a worse failure than a slower one. Reads are public data, so any Base node will do.
+ */
+export const RPC_FALLBACKS = ["https://mainnet.base.org", "https://base-rpc.publicnode.com"] as const;
+
 /** Set once the contract is deployed. Until then the league views show an empty state. */
 export const GAMEWEEK = (process.env.NEXT_PUBLIC_GAMEWEEK ?? "") as `0x${string}` | "";
 
