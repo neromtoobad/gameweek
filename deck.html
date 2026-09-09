@@ -1,0 +1,534 @@
+<title>Gameweek</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@400;700;800;900&family=Manrope:wght@400;500;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    /* The app's shipped tokens, unchanged. */
+    --ink: #08080b;
+    --deep-900: #101014;
+    --deep-800: #18181f;
+    --deep-700: #23232c;
+    --line-900: #1d1d25;
+    --line-800: #2c2c37;
+    --base: #0052ff;
+    --base-400: #3b7bff;
+    --volt: #d7ff3f;
+    --volt-600: #b9e02b;
+    --turf-900: #0b1a10;
+    --turf-800: #10241a;
+    --chalk-100: #f6f6f8;
+    --chalk-300: #b8b8c6;
+    --chalk-500: #7b7b8e;
+    --up: #35e3a0;
+    --down: #ff5c7a;
+
+    --display: "Big Shoulders Display", Impact, "Arial Narrow", sans-serif;
+    --sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    --mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+
+    /* Two corners cut, like a sticker. The app's card signature. */
+    --cut: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--chalk-100);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------------------------------------------------------------- shell */
+  .deck { max-width: 1080px; margin: 0 auto; padding: 0 20px 40px; }
+
+  .rail {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 0 12px;
+    background: linear-gradient(var(--ink) 72%, transparent);
+  }
+  .brand {
+    display: flex; align-items: baseline; gap: 9px;
+    font-family: var(--display); font-weight: 900;
+    font-size: 21px; letter-spacing: 0.03em; text-transform: uppercase;
+    margin-right: auto;
+  }
+  .brand .mark {
+    width: 11px; height: 11px; background: var(--base);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    transform: translateY(-1px);
+  }
+  .dots { display: flex; gap: 7px; }
+  .dot {
+    width: 26px; height: 4px; border: 0; padding: 0; cursor: pointer;
+    background: var(--line-800); border-radius: 2px;
+    transition: background 160ms ease;
+  }
+  .dot[aria-current="true"] { background: var(--volt); }
+  .dot:focus-visible { outline: 2px solid var(--base-400); outline-offset: 3px; }
+
+  .slide { display: none; padding: 8px 0 0; }
+  .slide[data-active="true"] { display: block; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--chalk-500);
+    display: flex; align-items: center; gap: 10px;
+    margin: 0 0 20px;
+  }
+  .eyebrow::after {
+    content: ""; flex: 1; height: 1px; background: var(--line-900);
+  }
+  .live {
+    color: var(--volt); display: inline-flex; align-items: center; gap: 6px;
+  }
+  .live::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--volt);
+  }
+
+  h1 {
+    font-family: var(--display); font-weight: 900; text-transform: uppercase;
+    font-size: clamp(2.9rem, 8.4vw, 5.4rem);
+    line-height: 0.87; letter-spacing: 0.005em;
+    text-wrap: balance; margin: 0 0 22px; max-width: 20ch;
+  }
+  h1 em { font-style: normal; color: var(--volt); }
+
+  h2 {
+    font-family: var(--display); font-weight: 800; text-transform: uppercase;
+    font-size: clamp(2.1rem, 5vw, 3.1rem);
+    line-height: 0.9; letter-spacing: 0.01em;
+    text-wrap: balance; margin: 0 0 18px; max-width: 24ch;
+  }
+
+  .lede { font-size: 1.06rem; line-height: 1.55; color: var(--chalk-300); max-width: 62ch; margin: 0 0 26px; }
+  .lede strong { color: var(--chalk-100); font-weight: 700; }
+  p { margin: 0 0 14px; }
+
+  /* ---------------------------------------------------------------- sticker card */
+  .card {
+    background: var(--deep-900);
+    border: 1px solid var(--line-900);
+    clip-path: polygon(0 var(--cut), var(--cut) 0, 100% 0,
+                       100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+    padding: 18px 20px;
+  }
+
+  .grid { display: grid; gap: 14px; }
+  .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (max-width: 720px) { .g2, .g3 { grid-template-columns: 1fr; } }
+
+  .k {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--chalk-500); margin: 0 0 9px;
+  }
+  .v {
+    font-family: var(--display); font-weight: 800; font-size: 2.4rem;
+    line-height: 0.92; letter-spacing: 0; font-variant-numeric: tabular-nums;
+    margin: 0;
+  }
+  .v.volt { color: var(--volt); }
+  .sub { font-size: 0.86rem; color: var(--chalk-500); margin: 7px 0 0; line-height: 1.4; }
+
+  /* ---------------------------------------------------------------- slide 1 */
+  .hero { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 34px; align-items: start; }
+  @media (max-width: 860px) { .hero { grid-template-columns: 1fr; gap: 24px; } }
+
+  .clock {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    gap: 12px; margin: 0 0 14px;
+  }
+  .clock .side { text-align: center; }
+  .clock .who {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--chalk-500); margin: 0 0 6px;
+  }
+  .clock .state {
+    font-family: var(--display); font-weight: 900; font-size: 1.5rem;
+    text-transform: uppercase; line-height: 1; margin: 0;
+  }
+  .shut { color: var(--down); }
+  .open { color: var(--up); }
+  .vs { font-family: var(--mono); font-size: 11px; color: var(--chalk-500); }
+
+  .gap-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line-900);
+  }
+  .gap-row:last-child { border-bottom: 0; }
+  .tick { font-family: var(--display); font-weight: 800; font-size: 1.32rem; text-transform: uppercase; letter-spacing: 0.02em; }
+  .px { font-family: var(--mono); font-size: 0.9rem; color: var(--chalk-300); font-variant-numeric: tabular-nums; }
+  .chip {
+    font-family: var(--mono); font-size: 0.8rem; font-variant-numeric: tabular-nums;
+    padding: 2px 7px; border-radius: 3px;
+  }
+  .chip.up { color: var(--up); background: rgba(53, 227, 160, 0.11); }
+  .chip.down { color: var(--down); background: rgba(255, 92, 122, 0.11); }
+
+  /* ---------------------------------------------------------------- slide 2 */
+  .squad { display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 30px; align-items: center; }
+  @media (max-width: 860px) { .squad { grid-template-columns: 1fr; } }
+  .pitch-wrap { background: var(--turf-900); border: 1px solid var(--line-900); padding: 6px;
+    clip-path: polygon(0 var(--cut), var(--cut) 0, 100% 0,
+                       100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%); }
+  svg { display: block; width: 100%; height: auto; }
+
+  .rule-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 13px; }
+  .rule-list li { display: grid; grid-template-columns: auto 1fr; gap: 13px; align-items: start; }
+  .rule-list .n {
+    font-family: var(--display); font-weight: 900; font-size: 1.02rem;
+    color: var(--volt); line-height: 1.25; min-width: 1.6ch;
+    font-variant-numeric: tabular-nums;
+  }
+  .rule-list p { margin: 0; font-size: 0.97rem; line-height: 1.5; color: var(--chalk-300); }
+  .rule-list b { color: var(--chalk-100); font-weight: 700; }
+
+  /* ---------------------------------------------------------------- slide 3 */
+  .addr {
+    font-family: var(--mono); font-size: 0.78rem; color: var(--chalk-300);
+    word-break: break-all; line-height: 1.5; margin: 6px 0 0;
+  }
+  .verified {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--up);
+    display: inline-flex; align-items: center; gap: 5px; margin-top: 9px;
+  }
+  .verified::before { content: "\2713"; font-size: 12px; }
+
+  .term {
+    background: #06060a; border: 1px solid var(--line-900);
+    padding: 15px 17px; overflow-x: auto;
+    clip-path: polygon(0 var(--cut), var(--cut) 0, 100% 0,
+                       100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+  }
+  .term pre {
+    margin: 0; font-family: var(--mono); font-size: 0.79rem; line-height: 1.85;
+    color: var(--chalk-300); white-space: pre;
+  }
+  .term .ok { color: var(--up); }
+  .term .cmd { color: var(--chalk-100); }
+  .term .hi { color: var(--volt); }
+  .term .dim { color: var(--chalk-500); }
+
+  .straight {
+    border-left: 2px solid var(--base);
+    padding: 2px 0 2px 16px; margin: 22px 0 0;
+    color: var(--chalk-300); font-size: 0.97rem; line-height: 1.55; max-width: 66ch;
+  }
+  .straight b { color: var(--chalk-100); font-weight: 700; }
+
+  /* ---------------------------------------------------------------- slide 4 */
+  table { width: 100%; border-collapse: collapse; }
+  caption {
+    text-align: left; font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--chalk-500);
+    padding-bottom: 11px;
+  }
+  th, td { text-align: left; padding: 10px 0; border-bottom: 1px solid var(--line-900); font-size: 0.95rem; }
+  th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--chalk-500); font-weight: 400; }
+  td:last-child, th:last-child { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  tbody tr:last-child td { border-bottom: 0; }
+  .total td { color: var(--volt); font-weight: 700; }
+
+  .close {
+    font-family: var(--display); font-weight: 900; text-transform: uppercase;
+    font-size: clamp(1.7rem, 4.2vw, 2.5rem); line-height: 0.95;
+    margin: 30px 0 0; text-wrap: balance; max-width: 30ch;
+  }
+  .close em { font-style: normal; color: var(--volt); }
+
+  .foot {
+    margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--line-900);
+    display: flex; flex-wrap: wrap; gap: 8px 22px;
+    font-family: var(--mono); font-size: 0.78rem; color: var(--chalk-500);
+  }
+  .foot a { color: var(--base-400); text-decoration: none; }
+  .foot a:hover { color: var(--volt); }
+  .foot a:focus-visible { outline: 2px solid var(--base-400); outline-offset: 2px; }
+
+  .nav { display: flex; gap: 10px; margin-top: 30px; }
+  .nav button {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    background: transparent; color: var(--chalk-300);
+    border: 1px solid var(--line-800); padding: 9px 15px; cursor: pointer;
+    transition: border-color 160ms ease, color 160ms ease;
+  }
+  .nav button:hover:not(:disabled) { border-color: var(--volt); color: var(--volt); }
+  .nav button:disabled { opacity: 0.32; cursor: default; }
+  .nav button:focus-visible { outline: 2px solid var(--base-400); outline-offset: 2px; }
+  .hint { font-family: var(--mono); font-size: 11px; color: var(--chalk-500); align-self: center; margin-left: auto; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="deck">
+  <div class="rail">
+    <div class="brand"><span class="mark"></span>Gameweek</div>
+    <div class="dots" role="tablist" aria-label="Slides">
+      <button class="dot" data-go="0" aria-current="true" aria-label="Slide 1: Wall Street shuts at four"></button>
+      <button class="dot" data-go="1" aria-current="false" aria-label="Slide 2: How a side is picked"></button>
+      <button class="dot" data-go="2" aria-current="false" aria-label="Slide 3: Deployed and proven"></button>
+      <button class="dot" data-go="3" aria-current="false" aria-label="Slide 4: What it costs"></button>
+    </div>
+  </div>
+
+  <!-- ============================================================ 1 -->
+  <section class="slide" data-active="true" aria-label="Wall Street shuts at four">
+    <p class="eyebrow">Base Builder Quest &middot; Tokenized Stocks</p>
+    <div class="hero">
+      <div>
+        <h1>Wall Street shuts at four. <em>Base does not.</em></h1>
+        <p class="lede">
+          Coinbase Tokenized Stocks keep trading onchain after the exchange has closed for the
+          night, and all weekend. <strong>Gameweek is a fantasy football league where the players
+          are real stocks</strong>, drafted into your own wallet, and the transfer market never
+          shuts.
+        </p>
+        <div class="clock">
+          <div class="side">
+            <p class="who">Nasdaq</p>
+            <p class="state shut">Closed</p>
+          </div>
+          <span class="vs">&middot;</span>
+          <div class="side">
+            <p class="who">Base</p>
+            <p class="state open">Trading</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="k">The board &middot; drift from Friday's close</p>
+        <div class="gap-row">
+          <span class="tick">NVDA</span><span class="px">$225.91</span><span class="chip up">+0.22%</span>
+        </div>
+        <div class="gap-row">
+          <span class="tick">TSLA</span><span class="px">$368.97</span><span class="chip down">&minus;0.38%</span>
+        </div>
+        <div class="gap-row">
+          <span class="tick">MSFT</span><span class="px">$493.54</span><span class="chip down">&minus;0.27%</span>
+        </div>
+        <div class="gap-row">
+          <span class="tick">SNDK</span><span class="px">$1,779.03</span><span class="chip up">+0.31%</span>
+        </div>
+        <p class="sub">
+          That percentage is the gap between the live Aerodrome pool price and the frozen exchange
+          close. It is a number that cannot exist anywhere but onchain.
+        </p>
+      </div>
+    </div>
+    <div class="nav">
+      <button data-prev disabled>&larr; Back</button>
+      <button data-next>Next &rarr;</button>
+      <span class="hint">Arrow keys work</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ 2 -->
+  <section class="slide" aria-label="How a side is picked">
+    <p class="eyebrow">The game</p>
+    <h2>Five stocks, one armband, ten points a percent</h2>
+    <div class="squad">
+      <div class="pitch-wrap">
+        <!-- 1-2-2. Positions are assigned by how hard a stock moves. -->
+        <svg viewBox="0 0 300 380" role="img" aria-label="A 1-2-2 formation: MSFT in goal, AMZN and META in defence, NVDA wearing the armband and TSLA up front.">
+          <rect x="0" y="0" width="300" height="380" fill="#0b1a10"/>
+          <g stroke="#2c4a36" stroke-width="1.5" fill="none">
+            <rect x="14" y="14" width="272" height="352"/>
+            <line x1="14" y1="190" x2="286" y2="190"/>
+            <circle cx="150" cy="190" r="42"/>
+            <rect x="95" y="14" width="110" height="42"/>
+            <rect x="95" y="324" width="110" height="42"/>
+          </g>
+
+          <!-- shirt: body + sleeves, one per pick -->
+          <g font-family="Big Shoulders Display, Impact, sans-serif" font-weight="800" text-anchor="middle">
+            <!-- forwards -->
+            <g transform="translate(88 66)">
+              <path d="M-15 -9 L-8 -14 L8 -14 L15 -9 L11 -4 L11 17 L-11 17 L-11 -4 Z" fill="#d7ff3f" stroke="#0b1a10" stroke-width="1.5"/>
+              <text y="8" font-size="9" fill="#08080b">NVDA</text>
+              <rect x="6" y="-3" width="7" height="4" fill="#0052ff"/>
+              <text y="30" font-size="11" fill="#d7ff3f">CAPTAIN</text>
+            </g>
+            <g transform="translate(212 66)">
+              <path d="M-15 -9 L-8 -14 L8 -14 L15 -9 L11 -4 L11 17 L-11 17 L-11 -4 Z" fill="#23232c" stroke="#4a4a58" stroke-width="1.5"/>
+              <text y="8" font-size="9" fill="#f6f6f8">TSLA</text>
+              <text y="30" font-size="11" fill="#7b7b8e">FORWARD</text>
+            </g>
+            <!-- defenders -->
+            <g transform="translate(88 210)">
+              <path d="M-15 -9 L-8 -14 L8 -14 L15 -9 L11 -4 L11 17 L-11 17 L-11 -4 Z" fill="#23232c" stroke="#4a4a58" stroke-width="1.5"/>
+              <text y="8" font-size="9" fill="#f6f6f8">AMZN</text>
+              <text y="30" font-size="11" fill="#7b7b8e">DEFENDER</text>
+            </g>
+            <g transform="translate(212 210)">
+              <path d="M-15 -9 L-8 -14 L8 -14 L15 -9 L11 -4 L11 17 L-11 17 L-11 -4 Z" fill="#23232c" stroke="#4a4a58" stroke-width="1.5"/>
+              <text y="8" font-size="9" fill="#f6f6f8">META</text>
+              <text y="30" font-size="11" fill="#7b7b8e">DEFENDER</text>
+            </g>
+            <!-- keeper -->
+            <g transform="translate(150 322)">
+              <path d="M-15 -9 L-8 -14 L8 -14 L15 -9 L11 -4 L11 17 L-11 17 L-11 -4 Z" fill="#23232c" stroke="#4a4a58" stroke-width="1.5"/>
+              <text y="8" font-size="9" fill="#f6f6f8">MSFT</text>
+              <text y="30" font-size="11" fill="#7b7b8e">KEEPER</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <ol class="rule-list">
+        <li><span class="n">1</span><p><b>A position per stock, set by how hard it moves.</b> Keepers are the steadiest names, forwards the ones that swing. You cannot field five forwards even when momentum says you should, and that constraint is the game.</p></li>
+        <li><span class="n">2</span><p><b>One pick wears the armband</b> and its stake is doubled. A real position size, not a multiplier bolted onto a scoreboard, so the chain settles exactly what the table shows.</p></li>
+        <li><span class="n">3</span><p><b>Ten points a percent.</b> A five percent day is fifty points, the range a real fantasy gameweek lands in. Points are only a presentation of the ratio the contract settles on.</p></li>
+        <li><span class="n">4</span><p><b>Every pick is a real swap</b> into a wallet you own, held by a passkey. A whole draft is one batched transaction, so you sign once and never end up holding two picks out of five.</p></li>
+        <li><span class="n">5</span><p><b>Twenty-four hours later the contract reads Chainlink</b>, ranks the league, and pays the top three sixty, thirty, ten. Then the next matchday opens.</p></li>
+      </ol>
+    </div>
+    <div class="nav">
+      <button data-prev>&larr; Back</button>
+      <button data-next>Next &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ============================================================ 3 -->
+  <section class="slide" aria-label="Deployed and proven">
+    <p class="eyebrow"><span class="live">Live on Base mainnet</span></p>
+    <h2>Deployed, verified, and proven against the real chain</h2>
+
+    <div class="grid g2" style="margin-bottom: 14px;">
+      <div class="card">
+        <p class="k">Gameweek.sol</p>
+        <p class="addr">0x91c0110852a7abd96e18a928e38d25ee8f384888</p>
+        <p class="verified">Source verified</p>
+      </div>
+      <div class="card">
+        <p class="k">GameweekRouter.sol</p>
+        <p class="addr">0x129e71616c4ad2a1f38c87502f7800ddbfdb1fdc</p>
+        <p class="verified">Source verified</p>
+      </div>
+    </div>
+
+    <div class="grid g3" style="margin-bottom: 20px;">
+      <div class="card"><p class="k">Stocks registered</p><p class="v">10</p><p class="sub">Each against its own Chainlink feed</p></div>
+      <div class="card"><p class="k">Tests passing</p><p class="v">64</p><p class="sub">Unit, fuzz and mainnet fork</p></div>
+      <div class="card"><p class="k">Live checks</p><p class="v volt">16</p><p class="sub">Against mainnet, spending nothing</p></div>
+    </div>
+
+    <div class="term">
+      <pre><span class="dim">$</span> <span class="cmd">node scripts/prove-live.mjs</span>
+<span class="ok">PASS</span>  ten tokenized stocks registered      <span class="dim">tokenCount() = 10</span>
+<span class="ok">PASS</span>  $0.25 buys NVDAc through the pool    <span class="hi">0.001100 shares</span>
+<span class="ok">PASS</span>  pool price tracks Chainlink          <span class="hi">$226.22 vs $225.91, 0.14% apart</span>
+<span class="ok">PASS</span>  a league opens                       <span class="dim">99688 gas</span>
+<span class="ok">PASS</span>  it locks once the window opens       <span class="dim">300108 gas</span>
+<span class="ok">PASS</span>  it settles after the final whistle   <span class="dim">299566 gas</span>
+<span class="ok">PASS</span>  a podium is ranked                   <span class="dim">winner 0xE8B04B60...</span>
+<span class="dim">Everything above passed. No transaction was sent and nothing was spent.</span></pre>
+    </div>
+
+    <p class="straight">
+      <b>Straight about what is not here:</b> no round has been played. The wallet holding the float
+      became unreachable before the first one could open, and a round with nothing staked in it
+      cannot settle, by design. So rather than claim a result that did not happen, every step the
+      round depends on runs against live mainnet: a real swap through the real Aerodrome pool via
+      <code>eth_call</code>, and a whole round opened, locked and settled in a multi-block
+      simulation with the clock moved forward onto real feed data. One command, in the repo.
+    </p>
+
+    <div class="nav">
+      <button data-prev>&larr; Back</button>
+      <button data-next>Next &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ============================================================ 4 -->
+  <section class="slide" aria-label="What it costs">
+    <p class="eyebrow">Why this answers the brief</p>
+    <h2>A gameweek costs a dollar</h2>
+    <p class="lede">
+      Measured onchain, not estimated: 0.006 gwei with ETH at $2,493. Gas is not the constraint on
+      Base, and the stake is not even consumed &mdash; <strong>a $1 draft becomes $1 of stock.</strong>
+    </p>
+
+    <div class="grid g2">
+      <div class="card">
+        <table>
+          <caption>Measured on Base mainnet</caption>
+          <thead><tr><th scope="col">Action</th><th scope="col">Cost</th></tr></thead>
+          <tbody>
+            <tr><td>Deploy both contracts</td><td>$0.066</td></tr>
+            <tr><td>Register all ten stocks</td><td>$0.007</td></tr>
+            <tr><td>Draft five picks, one batch</td><td>$0.010</td></tr>
+            <tr><td>Lock and settle a league</td><td>$0.007</td></tr>
+            <tr class="total"><td>Open a real round</td><td>$0.002</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <p class="k">The access argument</p>
+        <p style="font-size: 0.99rem; line-height: 1.55; color: var(--chalk-300); margin: 0 0 12px;">
+          The Request for Builders opens on emerging markets shut out of US equities by fees and
+          minimums. A brokerage cannot sell you a quarter of a dollar of Nvidia on a Sunday.
+        </p>
+        <p class="v volt" style="font-size: 2.9rem;">25&cent;</p>
+        <p class="sub">
+          Per pick. The only real burn is 50 bps to the router, which funds the pot, plus 5 bps to
+          the pool and slippage &mdash; about one percent per round trip.
+        </p>
+      </div>
+    </div>
+
+    <p class="close">A stock draft on a Sunday, which is the <em>one thing a brokerage cannot give you.</em></p>
+
+    <div class="foot">
+      <span><a href="https://gameweek-bay.vercel.app">gameweek-bay.vercel.app</a></span>
+      <span><a href="https://github.com/neromtoobad/gameweek">github.com/neromtoobad/gameweek</a></span>
+      <span>Solo build &middot; 5 days &middot; Base mainnet</span>
+    </div>
+
+    <div class="nav">
+      <button data-prev>&larr; Back</button>
+      <button data-next disabled>Next &rarr;</button>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+    var dots = Array.prototype.slice.call(document.querySelectorAll(".dot"));
+    var at = 0;
+
+    function show(i) {
+      at = Math.max(0, Math.min(slides.length - 1, i));
+      slides.forEach(function (s, n) {
+        if (n === at) s.setAttribute("data-active", "true");
+        else s.removeAttribute("data-active");
+      });
+      dots.forEach(function (d, n) {
+        d.setAttribute("aria-current", n === at ? "true" : "false");
+      });
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    document.addEventListener("click", function (e) {
+      var go = e.target.closest("[data-go]");
+      if (go) return show(parseInt(go.getAttribute("data-go"), 10));
+      if (e.target.closest("[data-next]")) return show(at + 1);
+      if (e.target.closest("[data-prev]")) return show(at - 1);
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); show(at + 1); }
+      if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); show(at - 1); }
+    });
+  })();
+</script>
