@@ -137,6 +137,7 @@ Use these exact numbers. They were all measured, not estimated.
 | Round | 24 hours, locks and settles 21:00 UTC at the US close |
 | Deploy cost | $0.066 for both contracts |
 | A three-pick draft | $0.010 of gas |
+| Wallets | Base Account (passkey, default) plus any EIP-6963 browser wallet: MetaMask, Rainbow, Coinbase Wallet |
 
 ### Do not claim
 
@@ -145,3 +146,11 @@ Use these exact numbers. They were all measured, not estimated.
   production, so neither is live. Say "wired, one environment variable away" if asked.
 - Sub Accounts have been exercised end to end. The SDK is configured for them and the draft path
   is built against them, but no player has ever connected.
+- That a browser wallet gets the one-signature draft. Only the Base Account does. Injected wallets
+  mostly do not implement EIP-5792, so they sign each pick in turn and it is not atomic. The
+  connect card says this on screen, so say the same thing if asked.
+
+### Worth one line if the draft section runs short
+
+> You do not need a passkey to play. Any Base wallet connects, and if it cannot batch, the app
+> falls back to signing each pick in turn rather than locking you out.
