@@ -58,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${display.variable} ${sans.variable} ${mono.variable} antialiased`}>
         <Providers>
           <MiniAppReady />
-          <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">{children}</div>
+          <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col lg:max-w-6xl">{children}</div>
           <TabBar />
         </Providers>
       </body>

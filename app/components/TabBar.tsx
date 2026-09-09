@@ -22,10 +22,10 @@ export function TabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line-800 bg-deep-950/90 backdrop-blur-md"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line-800 bg-deep-950/90 backdrop-blur-md lg:inset-x-auto lg:bottom-6 lg:left-1/2 lg:w-auto lg:-translate-x-1/2 lg:rounded-full lg:border lg:px-2 lg:shadow-[0_10px_40px_rgba(0,0,0,0.55)]"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="mx-auto flex max-w-md">
+      <div className="mx-auto flex max-w-md lg:max-w-none lg:gap-1">
         {TABS.map(({ href, label, icon: Icon, ...tab }) => {
           const base = href.replace(/#.*$/, "");
           const isAnchor = "anchor" in tab && tab.anchor;
@@ -36,11 +36,11 @@ export function TabBar() {
               key={href}
               href={href}
               aria-current={active ? "page" : undefined}
-              className={`relative flex h-14 flex-1 flex-col items-center justify-center gap-1 hed text-[12px] tracking-[0.1em] ${
+              className={`relative flex h-14 flex-1 flex-col items-center justify-center gap-1 hed text-[12px] tracking-[0.1em] lg:h-12 lg:w-28 lg:flex-none lg:rounded-full ${
                 active ? "text-volt" : "text-chalk-500 hover:text-chalk-300"
               }`}
             >
-              {active && <span className="absolute inset-x-6 top-0 h-[3px] bg-volt" />}
+              {active && <span className="absolute inset-x-6 top-0 h-[3px] bg-volt lg:inset-x-8 lg:top-1 lg:rounded-full" />}
               <Icon active={active} />
               {label}
             </Link>
