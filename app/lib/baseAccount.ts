@@ -1,6 +1,7 @@
 "use client";
 
 import { createBaseAccountSDK, type ProviderInterface } from "@base-org/account";
+import { ensureBaseNetwork, getActiveWalletId, getInjectedProvider } from "./wallets";
 import {
   APP_NAME,
   APP_URL,
@@ -43,7 +44,16 @@ export function getSdk() {
   return sdk;
 }
 
+/**
+ * The provider for whichever wallet the player picked.
+ *
+ * Everything that writes goes through here, so supporting a second kind of wallet is a change in
+ * one place rather than in every action. An injected wallet is an ordinary EIP-1193 provider, which
+ * is all the callers ever needed from the Base Account one.
+ */
 export function getProvider(): ProviderInterface {
+  const external = getInjectedProvider();
+  if (external) return external as unknown as ProviderInterface;
   return getSdk().getProvider();
 }
 
@@ -56,6 +66,17 @@ export type Accounts = {
 
 /** Opens the Base Account popup and returns both addresses. */
 export async function connect(): Promise<Accounts> {
+  const external = getInjectedProvider();
+  if (external) {
+    const accounts = (await external.request({
+      method: "eth_requestAccounts",
+    })) as `0x${string}`[];
+    if (!accounts?.length) throw new Error("That wallet returned no accounts");
+    await ensureBaseNetwork(external);
+    // An injected wallet has no Sub Account: the account itself is the league wallet, so it is
+    // what holds the stocks and what the league is scored on.
+    return { universal: accounts[0], league: accounts[0] };
+  }
   const provider = getProvider();
   const accounts = (await provider.request({ method: "eth_requestAccounts" })) as `0x${string}`[];
   return resolveAccounts(accounts);
@@ -63,6 +84,12 @@ export async function connect(): Promise<Accounts> {
 
 /** Reads accounts without prompting. Returns null when the player has not connected yet. */
 export async function restore(): Promise<Accounts | null> {
+  const external = getInjectedProvider();
+  if (external) {
+    const accounts = (await external.request({ method: "eth_accounts" })) as `0x${string}`[];
+    if (!accounts?.length) return null;
+    return { universal: accounts[0], league: accounts[0] };
+  }
   const provider = getProvider();
   const accounts = (await provider.request({ method: "eth_accounts" })) as `0x${string}`[];
   if (!accounts || accounts.length === 0) return null;
@@ -94,5 +121,8 @@ async function resolveAccounts(accounts: `0x${string}`[]): Promise<Accounts> {
 }
 
 export async function disconnect(): Promise<void> {
-  await getProvider().disconnect();
+  // An injected wallet has no disconnect: the extension owns that. Forgetting it locally is the
+  // most an app can honestly do.
+  if (getActiveWalletId() !== "base-account") return;
+  await getSdk().getProvider().disconnect();
 }

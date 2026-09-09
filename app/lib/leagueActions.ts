@@ -2,8 +2,9 @@
 
 import { encodeFunctionData } from "viem";
 import { getProvider } from "./baseAccount";
+import { sendBatch } from "./wallets";
 import { gameweekAbi } from "./gameweekAbi";
-import { CHAIN_ID, GAMEWEEK, PAYMASTER_URL } from "./config";
+import { GAMEWEEK, PAYMASTER_URL } from "./config";
 
 type Action = "join" | "lock" | "settle";
 
@@ -26,20 +27,10 @@ export async function sendLeagueAction(
     args: [BigInt(leagueId)],
   });
 
-  const result = await getProvider().request({
-    method: "wallet_sendCalls",
-    params: [
-      {
-        version: "2.0",
-        chainId: `0x${CHAIN_ID.toString(16)}`,
-        from,
-        atomicRequired: true,
-        calls: [{ to: GAMEWEEK, data, value: "0x0" }],
-        ...(PAYMASTER_URL ? { capabilities: { paymasterService: { url: PAYMASTER_URL } } } : {}),
-      },
-    ],
+  const { id } = await sendBatch(getProvider() as never, {
+    from,
+    calls: [{ to: GAMEWEEK, data, value: "0x0" }],
+    capabilities: PAYMASTER_URL ? { paymasterService: { url: PAYMASTER_URL } } : undefined,
   });
-
-  if (typeof result === "string") return result;
-  return (result as { id?: string } | null)?.id ?? "";
+  return id;
 }

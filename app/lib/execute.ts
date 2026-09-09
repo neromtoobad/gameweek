@@ -2,7 +2,8 @@
 
 import { encodeFunctionData, erc20Abi as viemErc20Abi } from "viem";
 import { getProvider } from "./baseAccount";
-import { CHAIN_ID, GAMEWEEK_ROUTER, PAYMASTER_URL, USDC } from "./config";
+import { sendBatch } from "./wallets";
+import { GAMEWEEK_ROUTER, PAYMASTER_URL, USDC } from "./config";
 import type { Pick } from "./draft";
 
 const routerAbi = [
@@ -88,26 +89,14 @@ export function buildDraftCalls(picks: Pick[], leagueWallet: `0x${string}`): Cal
  */
 export async function submitDraft(picks: Pick[], leagueWallet: `0x${string}`): Promise<string> {
   const calls = buildDraftCalls(picks, leagueWallet);
-  const provider = getProvider();
 
-  const result = await provider.request({
-    method: "wallet_sendCalls",
-    params: [
-      {
-        version: "2.0",
-        chainId: `0x${CHAIN_ID.toString(16)}`,
-        from: leagueWallet,
-        atomicRequired: true,
-        calls,
-        ...(PAYMASTER_URL ? { capabilities: { paymasterService: { url: PAYMASTER_URL } } } : {}),
-      },
-    ],
+  // One signature where the wallet can batch, one per call where it cannot.
+  const { id } = await sendBatch(getProvider() as never, {
+    from: leagueWallet,
+    calls,
+    capabilities: PAYMASTER_URL ? { paymasterService: { url: PAYMASTER_URL } } : undefined,
   });
-
-  // Depending on wallet version this is either a bare id or an object carrying one.
-  if (typeof result === "string") return result;
-  const asObject = result as { id?: string } | null;
-  return asObject?.id ?? "";
+  return id;
 }
 
 export type DraftReadiness = { ready: true } | { ready: false; reason: string };

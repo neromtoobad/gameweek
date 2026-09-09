@@ -1,7 +1,15 @@
 "use client";
 
+import { useEffect, useSyncExternalStore } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAccounts } from "@/lib/useAccounts";
+import {
+  discoverWallets,
+  getActiveWalletId,
+  setActiveWalletId,
+  subscribeWallets,
+  walletsSnapshot,
+} from "@/lib/wallets";
 import { readPortfolio } from "@/lib/prices";
 import { addressUrl } from "@/lib/config";
 import { shortAddress, usd } from "@/lib/format";
@@ -12,8 +20,14 @@ import { shortAddress, usd } from "@/lib/format";
  * Disconnected it is one line and one button. Connected it is the wallet's value set like a score,
  * because that number is the one a player checks first.
  */
+const EMPTY: ReturnType<typeof walletsSnapshot> = [];
+
 export function AccountBar() {
   const { accounts, status, error, connect, disconnect } = useAccounts();
+  // Browser extensions announce themselves on request, so ask once the page is interactive.
+  useEffect(discoverWallets, []);
+  const wallets = useSyncExternalStore(subscribeWallets, walletsSnapshot, () => EMPTY);
+  const activeId = useSyncExternalStore(subscribeWallets, getActiveWalletId, () => "base-account");
   const league = accounts?.league ?? null;
 
   const portfolio = useQuery({
@@ -28,13 +42,16 @@ export function AccountBar() {
   }
 
   if (status !== "connected" || !accounts) {
+    const others = wallets.filter((w) => w.id !== "base-account");
     return (
       <div className="cut-sm border border-line-800 bg-deep-900 p-3.5">
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="hed text-[19px]">League wallet</p>
             <p className="mt-0.5 text-xs leading-snug text-chalk-500">
-              Yours, held by a passkey. The stocks you draft land in it.
+              {activeId === "base-account"
+                ? "Yours, held by a passkey. The stocks you draft land in it."
+                : "The stocks you draft land in the wallet you connect."}
             </p>
           </div>
           <button
@@ -46,6 +63,45 @@ export function AccountBar() {
             {status === "connecting" ? "Opening…" : "Connect"}
           </button>
         </div>
+
+        {/* Only worth showing once a browser wallet has actually announced itself. */}
+        {others.length > 0 && (
+          <div className="mt-3 border-t border-line-900 pt-3">
+            <p className="kicker">Connect with</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {wallets.map((w) => {
+                const on = w.id === activeId;
+                return (
+                  <button
+                    key={w.id}
+                    type="button"
+                    onClick={() => setActiveWalletId(w.id)}
+                    aria-pressed={on}
+                    className={`cut-sm flex items-center gap-2 border px-3 py-2 text-xs transition ${
+                      on
+                        ? "border-volt bg-volt/10 text-volt"
+                        : "border-line-800 text-chalk-300 hover:border-line-700 hover:text-chalk-100"
+                    }`}
+                  >
+                    {w.icon ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={w.icon} alt="" width={16} height={16} className="rounded-sm" />
+                    ) : (
+                      <span className="h-4 w-4 rounded-sm bg-base-500" />
+                    )}
+                    {w.name}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-[11px] leading-snug text-chalk-500">
+              {activeId === "base-account"
+                ? "A passkey wallet gets a Sub Account and signs a whole draft once."
+                : "A browser wallet signs each pick separately, and pays its own gas."}
+            </p>
+          </div>
+        )}
+
         {error && <p className="mt-2 text-xs text-down">{error}</p>}
       </div>
     );
