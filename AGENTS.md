@@ -437,6 +437,13 @@ We built the loop that makes people trade tokenized stocks every week. Gameweek.
 - `forge script` simulates locally before it broadcasts, so a script that calls `setToken` (which reads `decimals()` from a B20 address) dies with `EvmError: OpcodeNotFound` even with --broadcast. Deploy and registration are therefore two steps: `forge script Deploy` for the contracts, then `./script/register-tokens.sh`, which uses one `cast send` of `setTokens` straight to the node. Ten separate `setToken` calls would mean ten password prompts and a contract that can end up half registered.
 - forge-std JSON paths support `.listings[0].ticker` but not `.listings.length` or a `[*]` projection. config/tokens.json carries an explicit `count` field for that reason.
 - B20 tokens are node precompiles, not deployed contracts. `cast code` on a B20 address returns a single placeholder byte. A live RPC executes them natively, but a Foundry fork has nothing to run, so every B20 call on a fork burns the gas limit and reverts. Fork tests must `vm.etch` an 8-decimal ERC20 at the B20 address; Chainlink feeds are ordinary contracts and work on a fork as-is. Anvil cannot simulate B20 at all. Verified and pinned by test_b20TokensHaveNoBytecode.
+- The B20 etch workaround broke under Foundry 1.8.1 (checked 2026-09-09). `vm.etch` lands and the
+  test contract can call the etched code, but once the suite has a `setUp` the etch is invisible to
+  any *other* contract calling in, so `setToken` reverts with empty data and three Fork tests fail.
+  Reproduced with both `new Gameweek` and `vm.deployCode`, and with the etch before or after the
+  deploy; only a suite with no `setUp` at all works. Plain `forge test` is unaffected and green at
+  64, because the fork tests self-skip without a fork URL. Do not chase this before submission:
+  app/scripts/prove-live.mjs proves the same paths against the real node, where B20 runs natively.
 - `setToken` reads `decimals()` from the token, so in a fork test the etch must happen before the registration call, not after.
 - `vm.expectRevert` claims the very next call. Reading a public constant like `league.MAX_MEMBERS()` inside the argument list consumes it and the test fails with "next call did not revert". Hoist those reads into locals first.
 - No testnet has the B20 stocks. Everything is mainnet with small amounts. Deploy costs cents on Base.

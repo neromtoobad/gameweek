@@ -10,8 +10,43 @@ your friends all week. Every swipe is a real swap into your own wallet. On Frida
 contract reads Chainlink, ranks the league, and pays a USDC pot to the top three. Then the next
 draft opens.
 
-Status: contracts complete and tested, 61 tests green. Draft loop working against live Aerodrome
-prices. Not yet deployed.
+## Live now
+
+| | |
+|---|---|
+| App | https://gameweek-bay.vercel.app |
+| `Gameweek` | [`0x91c0110852a7abd96e18a928e38d25ee8f384888`](https://base.blockscout.com/address/0x91c0110852a7abd96e18a928e38d25ee8f384888?tab=contract) on Base mainnet, source verified |
+| `GameweekRouter` | [`0x129e71616c4ad2a1f38c87502f7800ddbfdb1fdc`](https://base.blockscout.com/address/0x129e71616c4ad2a1f38c87502f7800ddbfdb1fdc?tab=contract) on Base mainnet, source verified |
+| Tests | 64 passing |
+
+Both contracts are deployed and all ten tradeable stocks are registered against their Chainlink
+feeds. The app reads live pool prices and live feed prices from mainnet on every page load.
+
+No round has been played yet. The wallet holding the float became unreachable before the first
+round could be opened, and a round with no stake in it cannot settle, because the contract skips
+members whose starting value is zero. Rather than claim a result that did not happen, everything
+the round depends on is proven against live mainnet instead:
+
+```
+cd app && node scripts/prove-live.mjs
+```
+
+That script spends nothing and sends no transaction. It reads the deployed contracts, then uses
+`eth_call` with an overridden USDC allowance to run a real draft pick through the real Aerodrome
+pool, and a multi-block simulation with the clock moved forward to open, lock and settle a whole
+round against the real Chainlink feeds at the moment each step would really fire. Sample run:
+
+```
+PASS  ten tokenized stocks registered           tokenCount() = 10
+PASS  $0.25 buys NVDAc through the pool         0.001100 shares
+PASS  pool price tracks Chainlink               $226.22 vs $225.91, 0.14% apart
+PASS  it locks once the window opens            300108 gas
+PASS  it settles after the final whistle        299566 gas
+PASS  a podium is ranked                        winner 0xE8B04B60...
+```
+
+Opening a real round is one funded transaction away: `createLeague` is permissionless and costs
+about two tenths of a cent.
 
 ## Drafting
 
@@ -130,9 +165,23 @@ to that.
 ```bash
 cd contracts
 forge build
-forge test                                              # 38 unit tests
-forge test --fork-url $BASE_RPC_URL --match-contract Fork -vv   # 6 tests against Base mainnet
+forge test                    # 64 passing
+
+cd ../app
+node scripts/prove-live.mjs   # 16 checks against live Base mainnet, spends nothing
 ```
+
+The fork suite needs a Base RPC and carries a known limitation:
+
+```bash
+forge test --fork-url $BASE_RPC_URL --match-contract Fork -vv
+```
+
+Three of its six tests fail under Foundry 1.8.1. B20 tokens are node precompiles rather than
+deployed contracts, so a fork has no bytecode to run and the tests etch an ERC20 at each B20
+address instead. That etch stops taking effect once the suite has a `setUp`, and the call reverts
+with empty data. It is a limitation of forking a precompile, not a contract defect: the same paths
+are exercised against the real node by `prove-live.mjs`, where B20 executes natively.
 
 Gas at the 50-member cap: `lock` 1.72M, `settle` 578K.
 
